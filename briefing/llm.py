@@ -52,8 +52,24 @@ def _slim(items: list[dict], n: int, summary_len: int = 280) -> list[dict]:
 
 def available() -> bool:
     return bool(shutil.which("claude")) and bool(
-        os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") or os.environ.get("ANTHROPIC_API_KEY")
+        os.environ.get("CLAUDE_CODE_OAUTH_TOKEN", "").strip() or os.environ.get("ANTHROPIC_API_KEY", "").strip()
     )
+
+
+def _env() -> dict:
+    """Pro-Token hat Vorrang. Ein gleichzeitig gesetzter API-Key würde sonst gewinnen und scheitern.
+    Steht versehentlich ein OAuth-Token (sk-ant-oat…) im API-Key-Secret, wird es umgehängt."""
+    env = dict(os.environ)
+    key = env.get("ANTHROPIC_API_KEY", "").strip()
+    tok = env.get("CLAUDE_CODE_OAUTH_TOKEN", "").strip()
+    if not tok and key.startswith("sk-ant-oat"):
+        tok = key
+    if tok:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = tok
+        env.pop("ANTHROPIC_API_KEY", None)
+    elif not key:
+        env.pop("ANTHROPIC_API_KEY", None)
+    return env
 
 
 def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | None:
@@ -72,7 +88,7 @@ def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | N
     try:
         res = subprocess.run(
             ["claude", "-p", "--model", model, "--output-format", "text", "--max-turns", "1"],
-            input=prompt, capture_output=True, text=True, timeout=300,
+            input=prompt, capture_output=True, text=True, timeout=300, env=_env(),
         )
     except Exception as e:  # noqa: BLE001
         log.warning("Claude-Aufruf fehlgeschlagen: %s", e)
