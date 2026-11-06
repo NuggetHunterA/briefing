@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f3eee3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14120e" media="(prefers-color-scheme: dark)">
+<title>Die Depesche · {{ e.edition }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%2314120e'/><text x='32' y='48' font-family='serif' font-size='44' text-anchor='middle' fill='%23f3eee3'>D</text></svg>">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-sun" viewBox="0 0 48 48"><circle cx="24" cy="24" r="9" fill="currentColor"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.2 4.2M33.9 33.9l4.2 4.2M9.9 38.1l4.2-4.2M33.9 14.1l4.2-4.2"/></g></symbol>
+    <symbol id="i-cloud" viewBox="0 0 48 48"><path d="M14 38h22a9 9 0 0 0 1-17.9A12 12 0 0 0 14.3 18 10 10 0 0 0 14 38z" fill="currentColor"/></symbol>
+    <symbol id="i-sun-cloud" viewBox="0 0 48 48"><circle cx="17" cy="17" r="7" fill="var(--accent)"/><g stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"><path d="M17 3v4M3 17h4M7 7l2.8 2.8M27 7l-2.8 2.8M7 27l2.8-2.8"/></g><path d="M18 41h18a8 8 0 0 0 .9-15.9A10.5 10.5 0 0 0 17 24a8.5 8.5 0 0 0 1 17z" fill="currentColor"/></symbol>
+    <symbol id="i-fog" viewBox="0 0 48 48"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M8 16h32M4 24h36M10 32h32M14 40h22"/></g></symbol>
+    <symbol id="i-drizzle" viewBox="0 0 48 48"><use href="#i-cloud" transform="translate(0 -8)"/><g fill="currentColor"><circle cx="16" cy="38" r="1.8"/><circle cx="24" cy="42" r="1.8"/><circle cx="32" cy="38" r="1.8"/></g></symbol>
+    <symbol id="i-rain" viewBox="0 0 48 48"><use href="#i-cloud" transform="translate(0 -8)"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M16 35l-3 7M25 35l-3 7M34 35l-3 7"/></g></symbol>
+    <symbol id="i-sleet" viewBox="0 0 48 48"><use href="#i-cloud" transform="translate(0 -8)"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M16 35l-3 7M32 35l-3 7"/></g><circle cx="24" cy="40" r="2" fill="currentColor"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 48 48"><use href="#i-cloud" transform="translate(0 -8)"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 34v8M12.5 36l7 4M12.5 40l7-4M32 34v8M28.5 36l7 4M28.5 40l7-4"/></g></symbol>
+    <symbol id="i-storm" viewBox="0 0 48 48"><use href="#i-cloud" transform="translate(0 -8)"/><path d="M26 30l-7 9h6l-3 8 9-11h-6l3-6z" fill="var(--accent)"/></symbol>
+  </defs>
+</svg>
+
+<header class="masthead">
+  <div class="mast-top">
+    <span>Persönliche Ausgabe</span>
+    <span class="mast-top-mid">Brandenburg an der Havel</span>
+    <span>Nr. {{ issue_no }}</span>
+  </div>
+
+  <div class="mast-row">
+    {% if weather %}
+    <a class="ear ear-weather" href="#wetter" aria-label="Wetter">
+      <svg class="ear-icon"><use href="#i-{{ weather.current.weather_code|wx(1) }}"/></svg>
+      <span class="ear-temp" data-live="temp">{{ weather.current.temperature_2m|num }}°</span>
+      <span class="ear-text"><span data-live="cond">{{ weather.current.weather_code|wx }}</span><br>
+        {% if weather.days %}{{ weather.days[0].max|num }}° / {{ weather.days[0].min|num }}°{% endif %}</span>
+    </a>
+    {% else %}<span class="ear"></span>{% endif %}
+
+    <h1 class="title"><a href="#top">Die Depesche</a></h1>
+
+    <div class="ear ear-edition">
+      <span class="ear-edition-name">{{ e.edition }}</span>
+      <span class="ear-text">Stand {{ now|hhmm }} Uhr<br><span class="js-age" data-generated="{{ e.generated }}"></span></span>
+    </div>
+  </div>
+
+  <div class="dateline">
+    <span>{{ long_date(now) }}</span>
+    <span class="dot">◆</span>
+    <span>{{ e.edition }}</span>
+    <span class="dot">◆</span>
+    <span>Spoilerfrei für MLB &amp; NBA</span>
+  </div>
+</header>
+
+<nav class="index" aria-label="Rubriken">
+  <a href="#welt">Welt</a>
+  <a href="#mlb">MLB</a>
+  <a href="#nba">NBA</a>
+  <a href="#fussball">Fußball</a>
+  <a href="#lesestoff">Lesestoff</a>
+  <a href="#brandenburg">Brandenburg</a>
+  <a href="#wetter">Wetter</a>
+</nav>
+
+<main class="paper" id="top">
+
+  {# ─────────────── Aufmacher ─────────────── #}
+  <section class="sec sec-lead" id="welt">
+    <h2 class="sec-head"><span>Die Welt</span><small>{{ s.welt|length }} Meldungen</small></h2>
+    {% if lead %}
+    <article class="lead">
+      {% if lead.image %}
+      <a class="lead-img" href="{{ lead.url }}" target="_blank" rel="noopener"><img src="{{ lead.image }}" alt="" loading="eager" decoding="async"></a>
+      {% endif %}
+      <div class="lead-body">
+        <p class="kicker">{{ lead.tag or lead.source }}</p>
+        <h3 class="lead-title"><a href="{{ lead.url }}" target="_blank" rel="noopener">{{ lead.title }}</a></h3>
+        {% if lead.summary %}<p class="lead-summary">{{ lead.summary }}</p>{% endif %}
+        <p class="meta">{{ lead.source }} · {{ lead.published|ago }}</p>
+      </div>
+    </article>
+    {% endif %}
+    <div class="briefs">
+      {% for it in welt_rest[:4] %}
+      <article class="brief">
+        <p class="kicker">{{ it.tag or it.source }}</p>
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ─────────────── Wetter ─────────────── #}
+  <aside class="sec sec-weather" id="wetter">
+    <h2 class="sec-head"><span>Wetter</span><small>{{ e.location.name }}</small></h2>
+    {% if weather %}
+    {% for a in weather.alerts %}<p class="alert">⚠ {{ a.headline }}</p>{% endfor %}
+    <div class="wx-now">
+      <svg class="wx-icon"><use href="#i-{{ weather.current.weather_code|wx(1) }}"/></svg>
+      <div>
+        <div class="wx-temp"><span data-live="temp">{{ weather.current.temperature_2m|num }}°</span></div>
+        <div class="wx-cond" data-live="cond">{{ weather.current.weather_code|wx }}</div>
+      </div>
+    </div>
+    <dl class="wx-facts">
+      <div><dt>Gefühlt</dt><dd data-live="feels">{{ weather.current.apparent_temperature|num }}°</dd></div>
+      <div><dt>Wind</dt><dd data-live="wind">{{ weather.current.wind_speed_10m|num }} km/h {{ weather.current.wind_direction_10m|compass }}</dd></div>
+      <div><dt>Feuchte</dt><dd data-live="hum">{{ weather.current.relative_humidity_2m|num }} %</dd></div>
+      {% if weather.days %}<div><dt>Sonne</dt><dd>{{ weather.days[0].sunrise|hhmm }}–{{ weather.days[0].sunset|hhmm }}</dd></div>{% endif %}
+    </dl>
+
+    <div class="wx-hours" role="list" aria-label="Die nächsten Stunden">
+      {% for h in weather.hours %}
+      <div class="wx-hour" role="listitem" style="--y: {{ '%.2f'|format(h.y) }}; --pp: {{ h.pp }}">
+        <span class="t">{{ h.temp|num }}°</span>
+        <span class="bar"><i></i></span>
+        <span class="pp">{% if h.pp >= 20 %}{{ h.pp }}%{% endif %}</span>
+        <span class="h">{{ h.time|hhmm }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <ul class="wx-days">
+      {% for d in weather.days[1:4] %}
+      <li>
+        <span class="d">{{ WD_SHORT[d.date.weekday()] }}</span>
+        <svg><use href="#i-{{ d.code|wx(1) }}"/></svg>
+        <span class="c">{{ d.code|wx }}</span>
+        <span class="r">{% if d.pp and d.pp >= 30 %}{{ d.pp }}%{% endif %}</span>
+        <span class="mm"><b>{{ d.max|num }}°</b> {{ d.min|num }}°</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">Wetterdaten gerade nicht verfügbar.</p>
+    {% endif %}
+  </aside>
+
+  {# ─────────────── MLB ─────────────── #}
+  <section class="sec sec-mlb" id="mlb">
+    <h2 class="sec-head"><span>MLB</span><small>Trades · Gerüchte · Verträge</small></h2>
+    {% if e.hidden.mlb %}<p class="stamp">Spoilerfrei · {{ e.hidden.mlb }} Meldung{{ 'en' if e.hidden.mlb != 1 }} mit Ergebnissen ausgeblendet</p>{% endif %}
+    <ol class="list">
+      {% for it in s.mlb %}
+      <li class="item{% if it.favorite %} fav fav-{{ it.favorite }}{% endif %}">
+        {% if it.favorite %}<span class="team team-{{ it.favorite }}">{{ favorites[it.favorite].name }}</span>{% endif %}
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if loop.index <= 3 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">Heute keine MLB-Meldungen.</li>
+      {% endfor %}
+    </ol>
+    {% if e.transactions %}
+    <div class="ledger">
+      <h4>Transaktionen</h4>
+      <ul>
+        {% for t in e.transactions[:6] %}
+        <li{% if t.favorite %} class="fav-{{ t.favorite }}"{% endif %}><span class="ledger-type">{{ t.type }}</span> {{ t.text }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </section>
+
+  {# ─────────────── NBA ─────────────── #}
+  <section class="sec sec-nba" id="nba">
+    <h2 class="sec-head"><span>NBA</span><small>Trades · Gerüchte · Verträge</small></h2>
+    {% if e.hidden.nba %}<p class="stamp">Spoilerfrei · {{ e.hidden.nba }} Meldung{{ 'en' if e.hidden.nba != 1 }} mit Ergebnissen ausgeblendet</p>{% endif %}
+    <ol class="list">
+      {% for it in s.nba %}
+      <li class="item">
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if loop.index <= 3 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">Heute keine NBA-Meldungen.</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {# ─────────────── Fußball ─────────────── #}
+  <section class="sec sec-fussball" id="fussball">
+    <h2 class="sec-head"><span>Fußball</span><small>Hertha BSC · Bundesliga</small></h2>
+    {% set h = e.hertha %}
+    {% if h %}
+    <div class="hertha">
+      <div class="hertha-head">
+        <span class="hertha-badge" aria-hidden="true"></span>
+        <div>
+          <strong>Hertha BSC</strong>
+          <span>{{ h.league }} · Platz {{ h.rank }}</span>
+        </div>
+      </div>
+      {% if h.next or h.last %}
+      <div class="fixtures">
+        {% if h.last %}<p><span class="lbl">Zuletzt</span> {{ h.last.home }} – {{ h.last.away }} <b>{{ h.last.result or '' }}</b></p>{% endif %}
+        {% if h.next %}<p><span class="lbl">Nächstes</span> {{ h.next.home }} – {{ h.next.away }} <span class="when">{{ h.next.when|short_day }} {{ h.next.when|hhmm }}</span></p>{% endif %}
+      </div>
+      {% endif %}
+      <table class="table">
+        <thead><tr><th>#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead>
+        <tbody>
+          {% for r in h.table %}
+          <tr{% if r.hertha %} class="is-hertha"{% endif %}><td>{{ r.rank }}</td><td>{{ r.team }}</td><td>{{ r.games }}</td><td>{{ '%+d'|format(r.diff) if r.diff is not none else '' }}</td><td><b>{{ r.points }}</b></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    <ol class="list">
+      {% for it in s.fussball %}
+      <li class="item{% if it.hertha %} fav fav-hertha{% endif %}">
+        {% if it.hertha %}<span class="team team-hertha">Hertha</span>{% endif %}
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if loop.index <= 2 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">Heute keine Fußball-Meldungen.</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {# ─────────────── Lesestoff ─────────────── #}
+  <section class="sec sec-longreads" id="lesestoff">
+    <h2 class="sec-head"><span>Lesestoff</span><small>Ausgewählt für heute</small></h2>
+    <div class="longreads">
+      {% for it in e.longreads %}
+      <article class="longread">
+        <span class="numeral" aria-hidden="true">{{ ['I','II','III','IV'][loop.index0] }}</span>
+        {% if it.image %}<a class="lr-img" href="{{ it.url }}" target="_blank" rel="noopener"><img src="{{ it.image }}" alt="" loading="lazy" decoding="async"></a>{% endif %}
+        <p class="kicker">{{ it.source }}</p>
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if it.why %}<p class="why">{{ it.why }}</p>{% endif %}
+        {% if it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <a class="read" href="{{ it.url }}" target="_blank" rel="noopener">Lesen →</a>
+      </article>
+      {% else %}
+      <p class="empty">Heute keine Empfehlungen.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ─────────────── Brandenburg ─────────────── #}
+  <section class="sec sec-brandenburg" id="brandenburg">
+    <h2 class="sec-head"><span>Brandenburg</span><small>Land &amp; Havelstadt</small></h2>
+    <ol class="list list-numbered">
+      {% for it in s.brandenburg %}
+      <li class="item{% if it.local %} fav fav-local{% endif %}">
+        {% if it.local %}<span class="team team-local">Vor Ort</span>{% endif %}
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if loop.index <= 3 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">Heute keine Meldungen aus Brandenburg.</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {# ─────────────── Welt, weitere ─────────────── #}
+  <section class="sec sec-world" id="welt-mehr">
+    <h2 class="sec-head"><span>Weitere Meldungen</span><small>Welt</small></h2>
+    <ol class="list">
+      {% for it in welt_rest[4:] %}
+      <li class="item">
+        <p class="kicker">{{ it.tag or it.source }}</p>
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">Keine weiteren Meldungen.</li>
+      {% endfor %}
+    </ol>
+  </section>
+</main>
+
+<footer class="colophon">
+  <p><strong>Die Depesche</strong> · {{ e.edition }} vom {{ long_date(now) }}, {{ now|hhmm }} Uhr ·
+    Redaktion: {{ 'Claude' if e.editor == 'claude' else 'automatische Regeln' }}</p>
+  <p>Nächste Ausgaben um 6, 13 und 19 Uhr. Alle Artikel verlinken auf die Originalquellen.
+    Quellen: MLB Trade Rumors, MLB Stats API, Hoops Rumors, kicker, OpenLigaDB, rbb24, tagesschau,
+    Deutschlandfunk, BBC, The Guardian, ProPublica, Aeon, Quanta Magazine, Open-Meteo (DWD), Bright Sky.</p>
+</footer>
+
+<script>window.BRIEFING = {lat: {{ e.location.lat }}, lon: {{ e.location.lon }}};</script>
+<script src="app.js" defer></script>
+</body>
+</html>
