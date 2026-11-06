@@ -12,6 +12,24 @@
   updateAge();
   setInterval(updateAge, 60000);
 
+  // Neuere Ausgabe da? Browser und GitHub-Cache halten die Seite bis zu 10 Minuten fest.
+  // data.json mit Zeitstempel umgeht den Cache; ist sie neuer, Seite unter neuer Adresse laden.
+  function checkFresh() {
+    if (!age || !window.fetch) return;
+    var mine = new Date(age.dataset.generated).getTime();
+    fetch("data.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.generated || new Date(d.generated).getTime() <= mine) return;
+        var v = "?v=" + encodeURIComponent(d.generated);
+        if (location.search === v) return; // schon versucht, keine Endlosschleife
+        location.replace(location.pathname + v + location.hash);
+      })
+      .catch(function () {});
+  }
+  checkFresh();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) checkFresh(); });
+
   // Aktive Rubrik in der Leiste markieren
   var links = Array.prototype.slice.call(document.querySelectorAll(".index a"));
   if ("IntersectionObserver" in window) {
