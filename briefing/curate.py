@@ -122,6 +122,10 @@ def prepare(raw: dict[str, list[dict]], now_utc: datetime) -> dict[str, list[dic
             items.sort(key=lambda x: not x["hertha"])
         elif section == "welt":
             items = round_robin(items)
+        elif section == "longreads":
+            # keine Podcasts, Videos oder Audio-Beiträge
+            items = [it for it in items if not re.search(r"podcast|/videos?/|/audio/", it["title"] + " " + it["url"], re.I)]
+            items = newest_first(items)
         else:
             items = newest_first(items)
         out[section] = items

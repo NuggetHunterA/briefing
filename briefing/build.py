@@ -100,7 +100,10 @@ def main() -> None:
     hidden = curate.apply_spoilers(sections, set(edited["spoilers"]) if edited else None, cutoff)
 
     if edited:
-        sections["welt"] = curate.order_by(sections["welt"], edited.get("welt", []))
+        welt_ids = edited.get("welt", [])
+        sections["welt"] = curate.order_by(sections["welt"], welt_ids)
+        if len(welt_ids) >= 5:  # Claude hat Dubletten und Boulevard schon aussortiert
+            sections["welt"] = [it for it in sections["welt"] if it["id"] in set(welt_ids)]
         bb_ids = edited.get("brandenburg", [])
         if bb_ids:
             sections["brandenburg"] = [it for it in curate.order_by(sections["brandenburg"], bb_ids) if it["id"] in set(bb_ids)]

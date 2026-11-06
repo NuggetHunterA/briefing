@@ -43,6 +43,8 @@ def clean(text: str | None, limit: int = 400) -> str:
     text = WS_RE.sub(" ", text).strip()
     # Feed-Floskeln am Ende entfernen
     text = re.sub(r"\s*(Continue reading|Read more|Weiterlesen|mehr)\s*\.{0,3}\s*$", "", text, flags=re.I)
+    text = re.sub(r"\s*The post .{5,300}? appeared first on .{2,60}?\.?\s*$", "", text)  # WordPress-Floskel
+    text = re.sub(r"^(\d{1,2}:\d{2} ?[ap]m( [A-Z]{2,3})?:\s*)", "", text)  # "12:03 pm CT:" in Live-Updates
     if len(text) > limit:
         text = text[:limit].rsplit(" ", 1)[0] + " …"
     return text
@@ -164,7 +166,9 @@ def fetch_all_news() -> dict[str, list[dict]]:
 TRANSACTION_TYPES = {
     "TR": "Trade", "SFA": "Free Agent", "SGN": "Vertrag", "CLW": "Waiver-Claim",
     "REL": "Entlassen", "DES": "Designated", "OUT": "Outright", "RET": "Rücktritt",
+    "DFA": "Free Agency",
 }
+FA_RE = re.compile(r"^(.*?) elected free agency\.?$", re.I)
 BORING_TYPES = {"SC", "ASG", "OPT", "CU", "RTN", "DFA_N", "NUM"}
 
 
@@ -194,6 +198,24 @@ def fetch_mlb_transactions(now: datetime, days: int = 4) -> list[dict]:
             "text": desc,
             "favorite": fav,
         })
+    # "X elected free agency" desselben Teams und Tages zu einer Zeile zusammenfassen
+    grouped, fa = [], {}
+    for t in out:
+        m = FA_RE.match(t["text"])
+        if m and t["favorite"]:
+            key = (t["favorite"], t["date"])
+            if key in fa:
+                fa[key]["names"].append(m.group(1))
+                continue
+            t = {**t, "names": [m.group(1)]}
+            fa[key] = t
+        grouped.append(t)
+    for t in grouped:
+        if t.get("names"):
+            team = config.MLB_FAVORITES[t["favorite"]]["name"]
+            names = t.pop("names")
+            t["text"] = f'{team}: {", ".join(names)} {"ist" if len(names) == 1 else "sind"} Free Agent.'
+    out = grouped
     # Trades und Lieblingsteams zuerst, dann nach Datum
     out.sort(key=lambda x: x["date"] or "", reverse=True)
     out.sort(key=lambda x: (x["favorite"] is None, x["code"] != "TR"))
