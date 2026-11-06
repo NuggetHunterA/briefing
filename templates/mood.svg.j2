@@ -1,0 +1,116 @@
+{# Stimmungsbild: Morgen = Kaffee, Mittag = Havel bei aktuellem Wetter, Abend = Stadt in der Dämmerung #}
+{% set m = mood %}
+<svg class="mood-art scene-{{ m.scene }}" viewBox="0 0 1200 320" preserveAspectRatio="xMidYMid slice" role="img" aria-label="{{ m.caption }}">
+  <defs>
+    <linearGradient id="g-sky-clear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--mood-sky-1)"/><stop offset="1" stop-color="var(--mood-sky-2)"/></linearGradient>
+    <linearGradient id="g-sky-grey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--mood-grey-1)"/><stop offset="1" stop-color="var(--mood-grey-2)"/></linearGradient>
+    <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--mood-water-1)"/><stop offset="1" stop-color="var(--mood-water-2)"/></linearGradient>
+    <linearGradient id="g-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141a33"/><stop offset=".55" stop-color="#2d2f55"/><stop offset=".85" stop-color="{{ '#b4563a' if m.sunny else '#4a4a63' }}"/><stop offset="1" stop-color="{{ '#e39a5c' if m.sunny else '#6b6878' }}"/></linearGradient>
+    <linearGradient id="g-dusk-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2a45"/><stop offset="1" stop-color="#0c0e1a"/></linearGradient>
+    <linearGradient id="g-beam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c9" stop-opacity=".55"/><stop offset="1" stop-color="#fff3c9" stop-opacity="0"/></linearGradient>
+    <radialGradient id="g-lamp"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+    <pattern id="p-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--ink)" stroke-width="1" opacity=".22"/></pattern>
+    <filter id="f-blur"><feGaussianBlur stdDeviation="6"/></filter>
+    <mask id="m-moon"><rect width="1200" height="320" fill="#fff"/><circle cx="944" cy="64" r="27" fill="#000"/></mask>
+    <symbol id="cloud" viewBox="0 0 200 80"><path d="M30 70h140a28 28 0 0 0 0-56 40 40 0 0 0-74-6A30 30 0 0 0 30 40a15 15 0 0 0 0 30z"/></symbol>
+  </defs>
+
+{% if m.scene == 'morning' %}
+  {# ─── Morgen: Kaffee am Fenster ─── #}
+  <rect width="1200" height="320" fill="var(--paper-2)"/>
+  <rect width="1200" height="320" fill="url(#p-hatch)" opacity=".5"/>
+  {# Fenster #}
+  <g>
+    <rect x="70" y="18" width="360" height="226" fill="{{ 'url(#g-sky-clear)' if m.sunny else 'url(#g-sky-grey)' }}"/>
+    {% if m.sunny %}<circle cx="330" cy="90" r="34" fill="var(--accent)" opacity=".9"/>{% endif %}
+    {% if not m.sunny %}<g class="drift" fill="var(--mood-cloud)"><use href="#cloud" x="90" y="40" width="170" height="68"/><use href="#cloud" x="250" y="90" width="150" height="60" opacity=".8"/></g>{% endif %}
+    {# ferne Dächer #}
+    <path d="M70 244V200h40l20-22 20 22h30v-30h18l12-40 12 40h16v52h40l26-26 26 26h40l20-18 20 18h24v44z" fill="var(--mood-far)"/>
+    {% if m.wet %}<g class="rain" stroke="var(--mood-rain)" stroke-width="1.6">{% for i in range(18) %}<line x1="{{ 80 + i*20 }}" y1="{{ 10 + (i*37)%120 }}" x2="{{ 72 + i*20 }}" y2="{{ 34 + (i*37)%120 }}" style="animation-delay:-{{ (i*0.13)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+    {% if m.snow %}<g class="snow" fill="#fff">{% for i in range(26) %}<circle cx="{{ 80 + (i*53)%340 }}" cy="{{ 20 + (i*29)%200 }}" r="{{ 2 + i%3 }}" style="animation-delay:-{{ (i*0.37)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+    {% if m.fog %}<rect x="70" y="18" width="360" height="226" fill="#fff" opacity=".45" filter="url(#f-blur)"/>{% endif %}
+    {# Rahmen #}
+    <g fill="none" stroke="var(--ink)" stroke-width="5"><rect x="70" y="18" width="360" height="226"/><line x1="250" y1="18" x2="250" y2="244"/><line x1="70" y1="131" x2="430" y2="131"/></g>
+    <rect x="58" y="244" width="384" height="10" fill="var(--ink)"/>
+  </g>
+  {% if m.sunny %}<polygon points="430,24 430,244 470,250 780,250" fill="url(#g-beam)" class="beam"/>{% endif %}
+  {# Tisch #}
+  <rect y="250" width="1200" height="70" fill="var(--mood-table)"/>
+  <g stroke="var(--ink)" stroke-width="1" opacity=".25"><path d="M0 268h1200M0 290h420M520 300h680M0 310h300"/></g>
+  <line x1="0" y1="250" x2="1200" y2="250" stroke="var(--ink)" stroke-width="2"/>
+  {# Zeitung #}
+  <g transform="translate(470 196) rotate(-4)">
+    <path d="M0 0h240l14 58H12z" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.6"/>
+    <text x="122" y="20" text-anchor="middle" font-family="UnifrakturMaguntia, serif" font-size="17" fill="var(--ink)">Die Depesche</text>
+    <g stroke="var(--ink)" stroke-width="1.2" opacity=".55"><path d="M20 28h210M22 36h96M24 44h94M26 52h92M134 36h100M136 44h100M138 52h100"/></g>
+  </g>
+  {# Tasse #}
+  <g transform="translate(830 0)">
+    <ellipse cx="0" cy="262" rx="118" ry="18" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+    <ellipse cx="0" cy="258" rx="70" ry="9" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".4"/>
+    <path d="M86 168c46-6 52 58 6 62" fill="none" stroke="var(--ink)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M86 168c46-6 52 58 6 62" fill="none" stroke="var(--paper)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-88 160h176c0 54-26 92-62 96h-52c-36-4-62-42-62-96z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-80 176c4 40 24 70 52 76" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".3"/>
+    <ellipse cx="0" cy="160" rx="88" ry="14" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.4"/>
+    <ellipse cx="0" cy="162" rx="76" ry="10" fill="#5b3a24"/>
+    <ellipse cx="-18" cy="160" rx="22" ry="3" fill="#c79a6b" opacity=".55"/>
+    <g class="steam" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" opacity=".5">
+      <path d="M-30 140c-14-16 14-26 0-44s12-28 0-44"/>
+      <path d="M2 136c-14-16 14-26 0-44s12-28 0-44" style="animation-delay:-1.3s"/>
+      <path d="M32 140c-14-16 14-26 0-44s12-28 0-44" style="animation-delay:-2.6s"/>
+    </g>
+  </g>
+
+{% elif m.scene == 'noon' %}
+  {# ─── Mittag: an der Havel ─── #}
+  <rect width="1200" height="210" fill="{{ 'url(#g-sky-clear)' if m.sunny else 'url(#g-sky-grey)' }}"/>
+  {% if m.sunny %}<g class="sun"><circle cx="960" cy="86" r="46" fill="var(--accent)"/><g stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity=".7">{% for a in range(0, 360, 30) %}<line x1="960" y1="22" x2="960" y2="8" transform="rotate({{ a }} 960 86)"/>{% endfor %}</g></g>{% endif %}
+  {% set nclouds = 2 if m.kind == 'sun-cloud' else (0 if m.kind == 'sun' else 6) %}
+  <g class="drift" fill="var(--mood-cloud)">{% for i in range(nclouds) %}<use href="#cloud" x="{{ (i*197 + 40) % 1100 }}" y="{{ 14 + (i*43) % 90 }}" width="{{ 180 + (i*31)%90 }}" height="{{ 72 + (i*13)%30 }}" opacity="{{ 1 - (i%3)*0.18 }}"/>{% endfor %}</g>
+  {# Ufer mit Dom und Häusern #}
+  <path d="M0 210V176c40-18 70-14 110-4 30-22 70-20 96 2h34V160h22v-16l14-10 14 10v16h24v50z" fill="var(--mood-far)"/>
+  <g fill="var(--mood-near)">
+    <path d="M300 210V96l-6 0 26-58 26 58h-6v40h150v-16l40-30 40 30V210z"/>
+        <path d="M640 210v-38h30v-14h40v14h60l30-26 30 26h50v-10h40v48z"/>
+    <path d="M880 210c10-40 50-60 80-40 20-30 70-26 86 4 30-10 60 4 70 36h84v0z"/>
+  </g>
+  <g fill="var(--mood-window)" opacity=".7"><rect x="318" y="110" width="4" height="14"/><rect x="380" y="160" width="6" height="16"/><rect x="400" y="160" width="6" height="16"/><rect x="420" y="160" width="6" height="16"/><rect x="660" y="184" width="6" height="10"/><rect x="744" y="180" width="6" height="10"/></g>
+  {# Wasser #}
+  <rect y="210" width="1200" height="110" fill="url(#g-water)"/>
+  <g class="shimmer" stroke="var(--mood-shine)" stroke-width="2" stroke-linecap="round" opacity=".55">{% for i in range(16) %}<line x1="{{ (i*137)%1150 }}" y1="{{ 222 + (i*17)%90 }}" x2="{{ (i*137)%1150 + 30 + (i*7)%40 }}" y2="{{ 222 + (i*17)%90 }}" style="animation-delay:-{{ (i*0.4)|round(1) }}s"/>{% endfor %}</g>
+  {# Ruderboot #}
+  <g transform="translate(760 246)"><path d="M-46 0h92l-14 14h-64z" fill="var(--mood-near)"/><line x1="-20" y1="-4" x2="-58" y2="20" stroke="var(--mood-near)" stroke-width="3"/><line x1="20" y1="-4" x2="58" y2="20" stroke="var(--mood-near)" stroke-width="3"/><circle cx="0" cy="-12" r="7" fill="var(--mood-near)"/><path d="M-6 -6h12v8h-12z" fill="var(--mood-near)"/></g>
+  {# Schilf #}
+  <g stroke="var(--mood-near)" stroke-width="3" stroke-linecap="round" class="reeds">{% for i in range(14) %}<path d="M{{ 20 + i*13 }} 320q{{ (i%3)*6 - 4 }} -{{ 50 + (i*23)%60 }} {{ (i%2)*10 - 4 }} -{{ 80 + (i*23)%70 }}" fill="none"/>{% if i % 3 == 0 %}<rect x="{{ 14 + i*13 + (i%2)*10 }}" y="{{ 232 - (i*23)%70 }}" width="8" height="22" rx="4" fill="var(--mood-near)" stroke="none"/>{% endif %}{% endfor %}</g>
+  {% if m.wet %}<g class="rain" stroke="var(--mood-rain)" stroke-width="1.6">{% for i in range(60) %}<line x1="{{ (i*41)%1220 }}" y1="{{ (i*53)%300 - 20 }}" x2="{{ (i*41)%1220 - 8 }}" y2="{{ (i*53)%300 + 6 }}" style="animation-delay:-{{ (i*0.07)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+  {% if m.snow %}<g class="snow" fill="#fff">{% for i in range(70) %}<circle cx="{{ (i*67)%1200 }}" cy="{{ (i*29)%300 }}" r="{{ 2 + i%3 }}" style="animation-delay:-{{ (i*0.29)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+  {% if m.storm %}<path class="flash" d="M560 30l-30 70h26l-22 66 60-88h-28l24-48z" fill="#fff6c2"/>{% endif %}
+  {% if m.fog %}<g opacity=".6" filter="url(#f-blur)" fill="#fff"><rect y="150" width="1200" height="40"/><rect y="200" width="1200" height="24" opacity=".7"/></g>{% endif %}
+
+{% else %}
+  {# ─── Abend: Stadt an der Havel in der Dämmerung ─── #}
+  <rect width="1200" height="214" fill="url(#g-dusk)"/>
+  {% if m.sunny %}<g class="stars" fill="#fff">{% for i in range(40) %}<circle cx="{{ (i*89)%1200 }}" cy="{{ 8 + (i*37)%120 }}" r="{{ 0.8 + (i%3)*0.5 }}" style="animation-delay:-{{ (i*0.23)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+  <circle cx="930" cy="74" r="30" fill="#f4e7c3" mask="url(#m-moon)"/>
+  {% if not m.sunny %}<g class="drift" fill="#3b3c55" opacity=".9">{% for i in range(5) %}<use href="#cloud" x="{{ (i*233 + 20) % 1100 }}" y="{{ 10 + (i*37)%70 }}" width="{{ 200 + (i*29)%80 }}" height="80"/>{% endfor %}</g>{% endif %}
+  {# Silhouette #}
+  <g fill="#0f111c">
+    <path d="M0 214V170h50v-20h30l20-18 20 18h40v-34h20l14-36 14 36h18V214z"/>
+    <path d="M300 214V96h-6l26-58 26 58h-6v40h150v-16l40-30 40 30v94z"/>
+    <path d="M560 214v-62h60v-22l30-24 30 24v22h50v-30h44v92z"/>
+    <path d="M820 214v-48h40l30-30 30 30h60v-20h50v68z"/>
+    <path d="M1050 214v-80h70v-20h80v100z"/>
+  </g>
+  <g class="windows" fill="#f3c867">{% for x, y in [(20,184),(34,184),(120,160),(170,170),(184,170),(330,150),(380,164),(402,164),(424,164),(446,164),(580,170),(596,170),(640,140),(700,176),(716,176),(760,170),(836,182),(900,170),(940,184),(960,184),(1070,150),(1090,150),(1070,176),(1110,140),(1140,140),(1160,170)] %}<rect x="{{ x }}" y="{{ y }}" width="7" height="10" style="animation-delay:-{{ (loop.index*1.7)|round(1) }}s"/>{% endfor %}</g>
+  {# Laterne #}
+  <circle cx="1010" cy="150" r="70" fill="url(#g-lamp)"/>
+  <g stroke="#0f111c" stroke-width="4"><line x1="1010" y1="150" x2="1010" y2="214"/></g><circle cx="1010" cy="148" r="6" fill="#ffe2a3"/>
+  {# Wasser mit Spiegelungen #}
+  <rect y="214" width="1200" height="106" fill="url(#g-dusk-water)"/>
+  <g class="shimmer" stroke="#f3c867" stroke-linecap="round" opacity=".55">{% for x in [24,124,177,334,391,413,435,588,644,708,764,840,904,950,1010,1074,1114,1150] %}<line x1="{{ x }}" y1="{{ 226 + (loop.index*11)%60 }}" x2="{{ x + 10 + (loop.index*5)%16 }}" y2="{{ 226 + (loop.index*11)%60 }}" stroke-width="2" style="animation-delay:-{{ (loop.index*0.3)|round(1) }}s"/>{% endfor %}</g>
+  <line x1="910" y1="224" x2="950" y2="224" stroke="#f4e7c3" stroke-width="2" opacity=".5"/>
+  {% if m.wet %}<g class="rain" stroke="#9aa3c7" stroke-width="1.4" opacity=".6">{% for i in range(50) %}<line x1="{{ (i*43)%1220 }}" y1="{{ (i*53)%300 - 20 }}" x2="{{ (i*43)%1220 - 8 }}" y2="{{ (i*53)%300 + 6 }}" style="animation-delay:-{{ (i*0.07)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+  {% if m.snow %}<g class="snow" fill="#fff">{% for i in range(60) %}<circle cx="{{ (i*67)%1200 }}" cy="{{ (i*29)%300 }}" r="{{ 1.5 + i%3 }}" style="animation-delay:-{{ (i*0.29)|round(2) }}s"/>{% endfor %}</g>{% endif %}
+{% endif %}
+</svg>
