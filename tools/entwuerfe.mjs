@@ -20,8 +20,9 @@ for (const [d, label] of Object.entries(designs)) {
   if (!existsSync(join(root, d, "index.html"))) continue;
   const shot = async (w, h, full, name) => {
     const p = await b.newPage({ viewport: { width: w, height: h } });
-    await p.goto(`http://localhost:8899/${d}/index.html`, { waitUntil: "networkidle" });
-    await p.waitForTimeout(800);
+    await p.goto(`http://localhost:8899/${d}/index.html`, { waitUntil: "load", timeout: 60000 }).catch(() => {});
+    await p.evaluate(async () => { for (const i of document.images) { i.loading = "eager"; } window.scrollTo(0, document.body.scrollHeight); await new Promise(r => setTimeout(r, 1500)); window.scrollTo(0, 0); }).catch(() => {});
+    await p.waitForTimeout(1500);
     await p.screenshot({ path: join(out, `${d}-${name}.png`), fullPage: full });
     await p.close();
   };
