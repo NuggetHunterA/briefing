@@ -19,6 +19,21 @@
   --athletics-2: #efb21e;
   --hertha: #005ca9;
 
+  /* Stimmungsbild */
+  --mood-sky-1: #f4d9a8;
+  --mood-sky-2: #fbeed3;
+  --mood-grey-1: #b9bcc0;
+  --mood-grey-2: #dcdbd6;
+  --mood-cloud: #f7f4ee;
+  --mood-far: #b8b2a3;
+  --mood-near: #2b2924;
+  --mood-window: #f3c867;
+  --mood-water-1: #8fa3ad;
+  --mood-water-2: #5d727d;
+  --mood-shine: #f4efe4;
+  --mood-rain: #6c7c88;
+  --mood-table: #d9cbb0;
+
   --f-mast: "UnifrakturMaguntia", "Old English Text MT", serif;
   --f-head: "Fraunces", "Georgia", serif;
   --f-body: "Newsreader", "Georgia", serif;
@@ -44,6 +59,18 @@
     --band-muted: #5b5446;
     --padres-2: #ffc425;
     --hertha: #4a9be0;
+    --mood-sky-1: #6b5a45;
+    --mood-sky-2: #3a3428;
+    --mood-grey-1: #3a3c40;
+    --mood-grey-2: #2a2a2a;
+    --mood-cloud: #55585e;
+    --mood-far: #4a463e;
+    --mood-near: #0c0b09;
+    --mood-water-1: #2f3d44;
+    --mood-water-2: #1b2429;
+    --mood-shine: #a9b6bc;
+    --mood-rain: #8d9aa5;
+    --mood-table: #3b3226;
     color-scheme: dark;
   }
 }
@@ -128,6 +155,47 @@ ol, ul { list-style: none; }
 .index::-webkit-scrollbar { display: none; }
 .index a { padding: 6px 2px; color: var(--ink-2); white-space: nowrap; border-bottom: 2px solid transparent; }
 .index a:hover, .index a.on { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ─────────────── Stimmungsbild ─────────────── */
+.mood {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--gap) var(--gutter) 0;
+}
+.mood figure { margin: 0; }
+.mood-frame {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+.mood-art { display: block; width: 100%; height: clamp(168px, 22vw, 320px); }
+.mood figcaption {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  padding-top: 8px;
+  font: italic 400 15px/1.4 var(--f-body); color: var(--ink-2);
+}
+.mood figcaption small { font: 500 11px/1 var(--f-label); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-style: normal; white-space: nowrap; }
+
+/* Bewegung: ein ruhiger Moment je Szene, aus bei reduzierter Bewegung oder wenn nicht sichtbar */
+.steam path { animation: steam 5.2s cubic-bezier(.22,.61,.36,1) infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes steam { 0% { transform: translateY(14px) scaleY(.85); opacity: 0; } 25% { opacity: .55; } 100% { transform: translateY(-34px) scaleY(1.1); opacity: 0; } }
+.rain line { animation: rain .8s linear infinite; }
+@keyframes rain { from { transform: translate(0, -40px); } to { transform: translate(-14px, 60px); } }
+.snow circle { animation: snow 7s linear infinite; }
+@keyframes snow { from { transform: translate(0, -30px); } to { transform: translate(18px, 90px); } }
+.drift { animation: drift 90s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translateX(-60px); } }
+.shimmer line { animation: shimmer 4s ease-in-out infinite; }
+@keyframes shimmer { 50% { opacity: .15; transform: translateX(8px); } }
+.stars circle { animation: twinkle 3.6s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: .25; } }
+.windows rect { animation: window 14s steps(1) infinite; }
+@keyframes window { 92% { opacity: 1; } 96% { opacity: .35; } }
+.flash { animation: flash 6s steps(1) infinite; opacity: 0; }
+@keyframes flash { 70% { opacity: 0; } 71% { opacity: 1; } 73% { opacity: 0; } 74% { opacity: .8; } 76% { opacity: 0; } }
+.mood.paused * { animation-play-state: paused !important; }
 
 /* ─────────────── Raster ─────────────── */
 .paper {
@@ -319,6 +387,7 @@ ol, ul { list-style: none; }
   .ear-weather, .ear-edition { display: none; }
   .dateline { font-size: 10.5px; gap: 4px 10px; }
   .dateline span:nth-child(4), .dateline span:nth-child(5) { display: none; }
+  .mood figcaption small { display: none; }
   .index { justify-content: flex-start; gap: 18px; }
   .paper { --gap: 26px; }
   /* Wetter nach oben, kompakt */
@@ -446,7 +515,13 @@ ol, ul { list-style: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }
+  .mood * { animation: none !important; }
 }
+
+/* Browser-Oberflächen im Zeitungston */
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 1px; }
+.table, .wx-hours, .wx-facts, .meta { font-variant-numeric: tabular-nums; }
 
 @media print {
   .index, .colophon { display: none; }

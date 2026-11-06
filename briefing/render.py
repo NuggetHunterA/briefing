@@ -123,6 +123,42 @@ def weather_view(w: dict | None, now: datetime) -> dict | None:
     return {"current": w.get("current", {}), "hours": hours, "days": days, "alerts": w.get("alerts", [])}
 
 
+MORNING_LINES = [
+    "Erst mal Kaffee.", "Der Tag beginnt mit einer Tasse.", "Kaffee ist fertig, die Zeitung auch.",
+    "Guten Morgen, Adrian.", "Noch fünf Minuten, dann geht's los.",
+]
+EVENING_LINES = [
+    "Feierabend.", "Der Tag ist gelesen.", "Licht aus an der Havel.", "Guten Abend, Adrian.",
+]
+
+
+def mood_view(weather: dict | None, now: datetime) -> dict:
+    """Stimmungsbild: Szene nach Tageszeit, Details nach Wetter."""
+    scene = "morning" if now.hour < 11 else ("noon" if now.hour < 17 else "evening")
+    cur = (weather or {}).get("current", {})
+    code = cur.get("weather_code")
+    kind = WMO.get(int(code), ("", "cloud"))[1] if code is not None else "cloud"
+    temp = cur.get("temperature_2m")
+    cond = WMO.get(int(code), ("",))[0] if code is not None else ""
+    day = (weather or {}).get("days") or []
+    t = f"{round(temp)}°" if temp is not None else ""
+    seed = now.toordinal()
+    if scene == "morning":
+        caption = f"{MORNING_LINES[seed % len(MORNING_LINES)]} Draußen: {cond} bei {t}." if t else MORNING_LINES[0]
+    elif scene == "noon":
+        caption = f"Mittag an der Havel: {cond}, {t}."
+        if day and (day[0].get("pp") or 0) >= 40:
+            caption += f" Regenrisiko {day[0]['pp']} %."
+    else:
+        caption = f"{EVENING_LINES[seed % len(EVENING_LINES)]} {cond} bei {t}."
+        if day and day[0].get("sunset"):
+            caption += f" Die Sonne ist um {as_dt(day[0]['sunset']).strftime('%H:%M')} untergegangen." if as_dt(day[0]["sunset"]) <= now else ""
+    clear = kind in ("sun", "sun-cloud")
+    return {"scene": scene, "kind": kind, "sunny": clear, "caption": caption,
+            "wet": kind in ("rain", "drizzle", "storm", "sleet"), "snow": kind == "snow",
+            "fog": kind == "fog", "storm": kind == "storm", "cloudy": kind in ("cloud", "fog") or not clear}
+
+
 def render(edition: dict, now: datetime) -> str:
     env = make_env(now)
     tpl = env.get_template("index.html.j2")
@@ -132,5 +168,6 @@ def render(edition: dict, now: datetime) -> str:
     return tpl.render(
         e=edition, s=edition["sections"], now=now, lead=lead, welt_rest=welt_rest,
         weather=weather_view(edition["weather"], now), favorites=config.MLB_FAVORITES,
+        mood=mood_view(weather_view(edition["weather"], now), now),
         issue_no=now.timetuple().tm_yday, utc_now=datetime.now(timezone.utc),
     )

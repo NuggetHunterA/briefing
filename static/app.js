@@ -30,6 +30,12 @@
     Object.keys(byId).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
   }
 
+  // Stimmungsbild nur animieren, solange es sichtbar ist
+  var mood = document.querySelector(".mood");
+  if (mood && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (en) { mood.classList.toggle("paused", !en[0].isIntersecting); }).observe(mood);
+  }
+
   // Aktuelle Werte direkt von Open-Meteo (erlaubt Browser-Zugriff); Vorhersage kommt aus der Ausgabe.
   var cfg = window.BRIEFING || {};
   var WMO = {0:"Klar",1:"Überwiegend klar",2:"Teils bewölkt",3:"Bedeckt",45:"Nebel",48:"Reifnebel",51:"Leichter Niesel",53:"Niesel",55:"Starker Niesel",56:"Gefrierender Niesel",57:"Gefrierender Niesel",61:"Leichter Regen",63:"Regen",65:"Starker Regen",66:"Gefrierender Regen",67:"Gefrierender Regen",71:"Leichter Schnee",73:"Schnee",75:"Starker Schnee",77:"Schneegriesel",80:"Regenschauer",81:"Regenschauer",82:"Heftige Schauer",85:"Schneeschauer",86:"Schneeschauer",95:"Gewitter",96:"Gewitter mit Hagel",99:"Gewitter mit Hagel"};

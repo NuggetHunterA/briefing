@@ -72,6 +72,13 @@
   <a href="#wetter">Wetter</a>
 </nav>
 
+<div class="mood" aria-label="Stimmungsbild">
+  <figure>
+    <div class="mood-frame">{% include "mood.svg.j2" %}</div>
+    <figcaption><span>{{ mood.caption }}</span><small>Zeichnung · {{ e.edition }}</small></figcaption>
+  </figure>
+</div>
+
 <main class="paper" id="top">
 
   {# ─────────────── Aufmacher ─────────────── #}
@@ -83,7 +90,7 @@
       <a class="lead-img" href="{{ lead.url }}" target="_blank" rel="noopener"><img src="{{ lead.image }}" alt="" onerror="this.parentNode.remove()" loading="eager" decoding="async"></a>
       {% endif %}
       <div class="lead-body">
-        <p class="kicker">{{ lead.tag or lead.source }}</p>
+        {% if lead.tag %}<p class="kicker">{{ lead.tag }}</p>{% endif %}
         <h3 class="lead-title"><a href="{{ lead.url }}" target="_blank" rel="noopener">{{ lead.title }}</a></h3>
         {% if lead.summary %}<p class="lead-summary">{{ lead.summary }}</p>{% endif %}
         <p class="meta">{{ lead.source }} · {{ lead.published|ago }}</p>
@@ -93,7 +100,7 @@
     <div class="briefs">
       {% for it in welt_rest[:4] %}
       <article class="brief">
-        <p class="kicker">{{ it.tag or it.source }}</p>
+        {% if it.tag %}<p class="kicker">{{ it.tag }}</p>{% endif %}
         <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
         {% if it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
         <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
@@ -106,7 +113,7 @@
   <aside class="sec sec-weather" id="wetter">
     <h2 class="sec-head"><span>Wetter</span><small>{{ e.location.name }}</small></h2>
     {% if weather %}
-    {% for a in weather.alerts %}<p class="alert">⚠ {{ a.headline }}</p>{% endfor %}
+    {% for a in weather.alerts %}<p class="alert"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6v4M8 11.6v.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> {{ a.headline }}</p>{% endfor %}
     <div class="wx-now">
       <svg class="wx-icon"><use href="#i-{{ weather.current.weather_code|wx(1) }}"/></svg>
       <div>
@@ -279,7 +286,7 @@
     <ol class="list">
       {% for it in welt_rest[4:] %}
       <li class="item">
-        <p class="kicker">{{ it.tag or it.source }}</p>
+        {% if it.tag %}<p class="kicker">{{ it.tag }}</p>{% endif %}
         <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
         <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
       </li>
