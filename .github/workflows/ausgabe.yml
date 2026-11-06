@@ -29,11 +29,21 @@ jobs:
         run: |
           offset=$(TZ=Europe/Berlin date +%z)
           [ "$offset" = "+0200" ] && want="3 4,11,17 * * *" || want="3 5,12,18 * * *"
-          if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ github.event.schedule }}" = "$want" ]; then
+          if [ "${{ github.event_name }}" != "schedule" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
-          else
+          elif [ "${{ github.event.schedule }}" != "$want" ]; then
             echo "Zeile '${{ github.event.schedule }}' gilt nicht bei Berliner Offset $offset."
             echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            # Reserve-Lauf: Hat Home Assistant die Ausgabe schon pünktlich angestoßen, nicht doppelt bauen.
+            site="${{ vars.BRIEFING_SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}"
+            age=$(curl -fsS "$site/data.json?t=$(date +%s)" | python3 -c 'import json,sys,datetime as d; g=d.datetime.fromisoformat(json.load(sys.stdin)["generated"]); print(int((d.datetime.now(d.timezone.utc)-g).total_seconds()//60))' 2>/dev/null || echo 9999)
+            if [ "$age" -lt 90 ]; then
+              echo "Ausgabe ist erst $age Minuten alt, Reserve-Lauf entfällt."
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - uses: actions/checkout@v4
