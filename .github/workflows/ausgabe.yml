@@ -61,7 +61,7 @@ jobs:
 
       - name: Debug-Dump (nur Test-Branches)
         if: steps.gate.outputs.run == 'true' && github.ref != 'refs/heads/main'
-        run: tar czf - raw.json site/index.html | base64 -w0 > dump.b64 && echo "DUMP-BEGIN" && cat dump.b64 && echo && echo "DUMP-END"
+        run: tar czf - raw.json site/index.html | base64 > dump.b64 && echo "DUMP-BEGIN" && cat dump.b64 && echo && echo "DUMP-END"
 
       - name: Ausgabe als Download (zum Prüfen)
         if: steps.gate.outputs.run == 'true'

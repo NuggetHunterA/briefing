@@ -31,7 +31,6 @@ FEEDS = {
     "mlb": [
         {"name": "MLB Trade Rumors", "url": "https://www.mlbtraderumors.com/feed"},
         {"name": "MLB Trade Rumors", "url": "https://www.mlbtraderumors.com/san-diego-padres/feed"},
-        {"name": "MLB Trade Rumors", "url": "https://www.mlbtraderumors.com/athletics/feed"},
         {"name": "MLB Trade Rumors", "url": "https://www.mlbtraderumors.com/oakland-athletics/feed"},
     ],
     "nba": [
@@ -39,7 +38,6 @@ FEEDS = {
     ],
     "fussball": [
         {"name": "kicker", "url": "https://newsfeed.kicker.de/team/hertha-bsc", "tag": "Hertha"},
-        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/hertha-bsc", "tag": "Hertha"},
         {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga"},
         {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga"},
         {"name": "rbb24 Sport", "url": "https://www.rbb24.de/sport/index.xml/feed=rss.xml"},
