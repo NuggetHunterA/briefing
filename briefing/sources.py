@@ -103,7 +103,7 @@ def fetch_feed(src: dict, section: str) -> list[dict]:
             "published": _published(e),
             "categories": [t.get("term", "") for t in e.get("tags", []) if t.get("term")],
         })
-    log.info("%-12s %-28s %3d Einträge", section, src["name"], len(items))
+    log.info("%-12s %-28s %3d Einträge  %s", section, src["name"], len(items), src["url"])
     return items
 
 

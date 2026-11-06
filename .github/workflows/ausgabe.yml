@@ -59,6 +59,10 @@ jobs:
           BRIEFING_SITE_URL: ${{ vars.BRIEFING_SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
         run: python -m briefing.build --out site --dump raw.json
 
+      - name: Debug-Dump (nur Test-Branches)
+        if: steps.gate.outputs.run == 'true' && github.ref != 'refs/heads/main'
+        run: tar czf - raw.json site/index.html | base64 -w0 > dump.b64 && echo "DUMP-BEGIN" && cat dump.b64 && echo && echo "DUMP-END"
+
       - name: Ausgabe als Download (zum Prüfen)
         if: steps.gate.outputs.run == 'true'
         uses: actions/upload-artifact@v4

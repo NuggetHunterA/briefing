@@ -38,6 +38,7 @@ FEEDS = {
         {"name": "Hoops Rumors", "url": "https://www.hoopsrumors.com/feed"},
     ],
     "fussball": [
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/team/hertha-bsc", "tag": "Hertha"},
         {"name": "kicker", "url": "https://newsfeed.kicker.de/news/hertha-bsc", "tag": "Hertha"},
         {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga"},
         {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga"},
