@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -187,6 +187,14 @@ def mood_view(weather: dict | None, now: datetime) -> dict:
             "fog": kind == "fog", "storm": kind == "storm", "cloudy": kind in ("cloud", "fog") or not clear}
 
 
+def issue_number(now: datetime) -> int:
+    """Fortlaufende Nummer: drei Ausgaben pro Tag (morgens, mittags, abends), ab FIRST_ISSUE_DATE.
+    Aus Datum und Uhrzeit berechnet, damit ein wiederholter Lauf dieselbe Nummer bekommt."""
+    days = (now.date() - date.fromisoformat(config.FIRST_ISSUE_DATE)).days
+    slot = sum(1 for hour in config.EDITIONS if now.hour >= hour) or 1
+    return max(1, days * len(config.EDITIONS) + slot)
+
+
 def render(edition: dict, now: datetime) -> str:
     env = make_env(now)
     tpl = env.get_template("index.html.j2")
@@ -197,5 +205,5 @@ def render(edition: dict, now: datetime) -> str:
         e=edition, s=edition["sections"], now=now, lead=lead, welt_rest=welt_rest,
         weather=weather_view(edition["weather"], now), favorites=config.MLB_FAVORITES,
         mood=mood_view(weather_view(edition["weather"], now), now),
-        issue_no=now.timetuple().tm_yday, utc_now=datetime.now(timezone.utc),
+        issue_no=issue_number(now), utc_now=datetime.now(timezone.utc),
     )

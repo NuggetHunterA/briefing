@@ -11,6 +11,8 @@ LOCATION = {"name": "Brandenburg an der Havel", "lat": 52.4125, "lon": 12.5316}
 
 # Ausgaben (Stunde in Berliner Zeit -> Name)
 EDITIONS = {6: "Morgenausgabe", 13: "Mittagsausgabe", 19: "Abendausgabe"}
+# Erste Ausgabe: Morgenausgabe an diesem Tag ist Nr. 1, danach drei Nummern pro Tag.
+FIRST_ISSUE_DATE = "2026-11-06"
 
 # Wie viele Meldungen pro Rubrik höchstens gezeigt werden (hält das Layout planbar)
 LIMITS = {"mlb": 7, "nba": 6, "fussball": 6, "brandenburg": 7, "welt": 8, "longreads": 3}
