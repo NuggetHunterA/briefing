@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Morgenbrief · {{ long_date(now) }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..800;1,7..72,300..700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfaf7;--fg:#22201c;--mute:#8a8378;--hair:#e7e2d8;--acc:#1f5f8b;--hl:#fff1b8;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#161512;--fg:#e9e4da;--mute:#8f887c;--hair:#2c2a25;--acc:#7cb6e0;--hl:#4a3f12;color-scheme:dark}}
+*,*::before,*::after{box-sizing:border-box}h1,h2,h3,p,ol,ul{margin:0;padding:0}a{color:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 19px/1.62 Literata,Georgia,serif;font-optical-sizing:auto;-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:clamp(24px,6vw,80px) clamp(18px,5vw,64px) 60px;display:grid;grid-template-columns:minmax(0,1fr);gap:0 64px}
+.letter{max-width:640px}
+.head{font-size:13px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;border-bottom:1px solid var(--hair);padding-bottom:12px;margin-bottom:clamp(28px,5vw,56px)}
+h1{font-size:clamp(36px,5vw,54px);font-weight:300;letter-spacing:-.02em;line-height:1.05;margin-bottom:22px}
+h1 em{font-weight:500}
+p+p{margin-top:1em}
+.letter a{text-decoration:none;background-image:linear-gradient(var(--acc),var(--acc));background-size:100% 1px;background-repeat:no-repeat;background-position:0 100%}
+.letter a:hover{color:var(--acc)}
+h2{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin:2.4em 0 .7em}
+.ul{list-style:none;padding:0}.ul li{position:relative;padding-left:1.1em;margin:.5em 0}.ul li::before{content:"–";position:absolute;left:0;color:var(--mute)}
+.src{font-size:.72em;color:var(--mute);font-style:italic;white-space:nowrap}
+mark{background:var(--hl);color:inherit;padding:0 .15em}
+.hide{font-size:16px;color:var(--mute);font-style:italic}
+.lr{margin-top:.6em}.lr li{margin:1.2em 0}.lr b{font-weight:600}.lr .why{display:block;font-style:italic;color:var(--mute);font-size:17px}
+.sign{margin-top:2.6em;font-style:italic}
+.sign b{display:block;font-style:normal;font-weight:600}
+/* Randspalte */
+.margin{font-size:14px;line-height:1.5;color:var(--mute)}
+.margin section{border-top:1px solid var(--hair);padding:14px 0 22px}
+.margin h4{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg);font-weight:700}
+.margin .big{font-size:52px;font-weight:300;color:var(--fg);line-height:1;letter-spacing:-.03em}
+.margin table{width:100%;border-collapse:collapse}.margin td{padding:4px 0;border-bottom:1px dotted var(--hair)}.margin td:last-child{text-align:right;color:var(--fg)}
+.margin tr.me td{color:var(--acc);font-weight:700}
+@media (max-width:899px){.margin{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;margin-top:40px}.margin section:first-child{grid-column:1/-1}}
+@media (max-width:639px){body{font-size:17.5px}.margin{grid-template-columns:1fr}}
+@media (min-width:900px){.page{grid-template-columns:minmax(0,640px) minmax(0,1fr)}.margin{position:sticky;top:24px;align-self:start;padding-top:calc(13px + 12px + clamp(28px,5vw,56px))}}
+</style>
+</head>
+<body>
+<div class="page">
+<article class="letter">
+  <div class="head"><span>{{ e.edition }}</span><span>{{ long_date(now) }}</span></div>
+  <h1>{{ greeting }}, <em>Adrian.</em></h1>
+  {% if weather %}{% set d0 = weather.days[0] if weather.days else None %}
+  <p>In Brandenburg an der Havel ist es gerade {{ weather.current.weather_code|wx|lower }} bei {{ weather.current.temperature_2m|num }} Grad{% if d0 %}, heute werden es höchstens {{ d0.max|num }} Grad{% if d0.pp and d0.pp >= 40 %}, und es kann regnen ({{ d0.pp }} Prozent){% endif %}{% endif %}. Die Sonne geht um {{ d0.sunset|hhmm if d0 }} Uhr unter.{% if weather.alerts %} <mark>Der DWD warnt: {{ weather.alerts[0].headline }}.</mark>{% endif %}</p>
+  {% endif %}
+  {% if lead %}<p>Das Wichtigste aus der Welt: <a href="{{ lead.url }}">{{ lead.title }}</a>. {{ lead.summary }}</p>{% endif %}
+
+  <h2>Baseball</h2>
+  {% set favs = s.mlb|selectattr('favorite')|list %}
+  {% if favs %}<p>Von deinen Teams gibt es Neues: {% for it in favs[:3] %}<a href="{{ it.url }}">{{ it.title }}</a>{{ '; ' if not loop.last else '.' }}{% endfor %}</p>{% endif %}
+  <ul class="ul">{% for it in s.mlb if not it.favorite %}{% if loop.index <= 5 %}<li><a href="{{ it.url }}">{{ it.title }}</a> <span class="src">{{ it.published|ago }}</span></li>{% endif %}{% endfor %}</ul>
+  {% if e.transactions %}<p style="font-size:16px;color:var(--mute);margin-top:.8em">Offiziell gemeldet: {% for t in e.transactions[:3] %}{{ t.text }}{{ ' ' }}{% endfor %}</p>{% endif %}
+  {% if e.hidden.mlb %}<p class="hide">{{ e.hidden.mlb }} Meldungen mit Ergebnissen von gestern habe ich weggelassen.</p>{% endif %}
+
+  <h2>Basketball</h2>
+  <ul class="ul">{% for it in s.nba[:5] %}<li><a href="{{ it.url }}">{{ it.title }}</a> <span class="src">{{ it.published|ago }}</span></li>{% endfor %}</ul>
+  {% if e.hidden.nba %}<p class="hide">{{ e.hidden.nba }} Meldungen mit Ergebnissen habe ich weggelassen, damit du die Spiele in Ruhe schauen kannst.</p>{% endif %}
+
+  <h2>Hertha</h2>
+  {% set h = e.hertha %}
+  <p>{% if h %}Hertha steht in der {{ h.league }} auf Platz {{ h.rank }}{% if h.last %}, zuletzt {{ h.last.home }} gegen {{ h.last.away }} {{ h.last.result }}{% endif %}.{% if h.next %} Als Nächstes geht es am {{ h.next.when|short_day }} um {{ h.next.when|hhmm }} Uhr: {{ h.next.home }} gegen {{ h.next.away }}.{% endif %}{% endif %}</p>
+  <ul class="ul">{% for it in s.fussball[:4] %}<li><a href="{{ it.url }}">{{ it.title }}</a> <span class="src">{{ it.source }}</span></li>{% endfor %}</ul>
+
+  <h2>Aus Brandenburg</h2>
+  <ul class="ul">{% for it in s.brandenburg[:5] %}<li><a href="{{ it.url }}">{{ it.title }}</a>{% if loop.first and it.summary %}. {{ it.summary }}{% endif %}</li>{% endfor %}</ul>
+
+  <h2>Und sonst in der Welt</h2>
+  <ul class="ul">{% for it in welt_rest[:6] %}<li><a href="{{ it.url }}">{{ it.title }}</a> <span class="src">{{ it.source }}</span></li>{% endfor %}</ul>
+
+  <h2>Für später</h2>
+  <p>Wenn du heute Zeit zum Lesen hast, empfehle ich dir diese drei Texte:</p>
+  <ol class="ul lr">{% for it in e.longreads %}<li><b><a href="{{ it.url }}">{{ it.title }}</a></b> <span class="src">{{ it.source }}</span>{% if it.why %}<span class="why">{{ it.why }}</span>{% endif %}</li>{% endfor %}</ol>
+
+  <p class="sign">Einen guten Tag dir.<b>Dein Morgenbrief</b></p>
+</article>
+
+<aside class="margin">
+  {% if weather %}<section><h4>Wetter</h4><div class="big" data-live="temp">{{ weather.current.temperature_2m|num }}°</div><div data-live="cond">{{ weather.current.weather_code|wx }}</div>
+    <table style="margin-top:10px">{% for d in weather.days[1:4] %}<tr><td>{{ WD_SHORT[d.date.weekday()] }} · {{ d.code|wx }}</td><td>{{ d.max|num }}° / {{ d.min|num }}°</td></tr>{% endfor %}</table></section>{% endif %}
+  {% if e.hertha %}<section><h4>{{ e.hertha.league }}</h4><table>{% for r in e.hertha.table %}<tr{% if r.hertha %} class="me"{% endif %}><td>{{ r.rank }}. {{ r.team }}</td><td>{{ r.points }}</td></tr>{% endfor %}</table></section>{% endif %}
+  <section><h4>Nächste Ausgaben</h4>13 Uhr Mittagsausgabe<br>19 Uhr Abendausgabe</section>
+</aside>
+</div>
+<script>window.BRIEFING={lat:{{ e.location.lat }},lon:{{ e.location.lon }}};</script><script src="app.js" defer></script>
+</body></html>

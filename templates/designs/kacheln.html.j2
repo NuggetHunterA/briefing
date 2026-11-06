@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Mein Tag · {{ e.edition }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eceef2;--tile:#fff;--fg:#14171c;--mute:#6b7280;--hair:#eef0f3;--r:24px;
+  --mlb:#1d3a8a;--nba:#e35d2f;--fb:#0b63b6;--bb:#c8102e;--welt:#334155;--lr:#6d4bd8;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0d0f13;--tile:#171a20;--fg:#eef0f4;--mute:#9099a8;--hair:#23272f;--mlb:#7c9cff;--nba:#ff8a5c;--fb:#58a6ff;--bb:#ff5c72;--welt:#a3b2c7;--lr:#a98bff;color-scheme:dark}}
+*,*::before,*::after{box-sizing:border-box}h1,h2,h3,p,ol,ul{margin:0;padding:0}ol,ul{list-style:none}a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 15px/1.45 "Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1440px;margin:0 auto;padding:clamp(14px,2.4vw,32px)}
+.hello{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:6px 6px 18px}
+.hello h1{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-.035em;line-height:1.02}
+.hello p{color:var(--mute);font-weight:600;margin-top:6px}
+.pill{background:var(--tile);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;white-space:nowrap}
+.bento{display:grid;gap:clamp(10px,1.2vw,16px);grid-template-columns:minmax(0,1fr);grid-auto-flow:dense}
+.t{background:var(--tile);border-radius:var(--r);padding:20px;min-width:0;position:relative;overflow:hidden}
+.t-h{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;font-weight:800;letter-spacing:.02em}
+.t-h i{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-style:normal;font-size:14px;background:var(--c)}
+.t-h small{margin-left:auto;color:var(--mute);font-weight:600}
+.items li{padding:11px 0;border-top:1px solid var(--hair)}.items li:first-child{border-top:0;padding-top:0}
+.items h3{font-size:15.5px;font-weight:700;line-height:1.3;letter-spacing:-.01em}
+.items p{color:var(--mute);font-size:13.5px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.items .m{color:var(--mute);font-size:12px;margin-top:4px;font-weight:600}
+.chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;margin-bottom:6px;color:#fff;background:var(--c)}
+.chip.sd{background:#2f241d;color:#ffc425}.chip.ath{background:#003831;color:#efb21e}
+.shield{display:inline-flex;gap:6px;align-items:center;background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;margin-bottom:12px}
+/* Wetter-Kachel */
+.wx{color:#fff;background:linear-gradient(160deg,#5b7fa6 0%,#2f4a6b 100%)}
+.wx.sun{background:linear-gradient(160deg,#f6b13c,#e5703a)}.wx.rain{background:linear-gradient(160deg,#4b6584,#2c3e50)}
+.wx .now{display:flex;justify-content:space-between;align-items:flex-start}
+.wx .temp{font-size:clamp(64px,7vw,92px);font-weight:300;letter-spacing:-.06em;line-height:.9}
+.wx .cond{font-weight:700;font-size:17px;margin-top:6px}.wx .sub{opacity:.8;font-size:13px}
+.wx .hrs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:18px;text-align:center;font-size:12px}
+.wx .hrs div{background:rgba(255,255,255,.14);border-radius:14px;padding:8px 0}.wx .hrs b{display:block;font-size:15px}
+.wx .days{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;font-size:12.5px}
+.wx .days div{background:rgba(0,0,0,.14);border-radius:14px;padding:8px 10px;display:flex;justify-content:space-between}
+/* Aufmacher */
+.lead{display:flex;flex-direction:column;justify-content:flex-end;min-height:300px;color:#fff;background:#1f2937}
+.lead img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lead::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.78))}
+.lead>*:not(img){position:relative;z-index:1}
+.lead .chip{background:rgba(255,255,255,.2);backdrop-filter:blur(6px)}
+.lead h2{font-size:clamp(24px,2.8vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.lead p{opacity:.85;margin-top:8px;font-size:14px;max-width:60ch}
+/* Hertha */
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;gap:8px;background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:18px;padding:14px;margin-bottom:12px}
+.score b{display:block;font-size:15px}.score .vs{font-size:12px;font-weight:800;color:var(--c)}
+.mini{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}.mini td{padding:5px 0}.mini td:last-child{text-align:right;font-weight:800}.mini tr.me td{color:var(--c)}
+/* Lesestoff */
+.lr{display:grid;gap:12px}
+.lr a{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;padding:10px;border-radius:18px;background:color-mix(in srgb,var(--c) 7%,transparent)}
+.lr .ph{width:72px;height:72px;border-radius:14px;overflow:hidden;background:color-mix(in srgb,var(--c) 30%,transparent);display:grid;place-items:center;color:#fff;font-weight:800;font-size:24px}
+.lr .ph img{width:100%;height:100%;object-fit:cover}
+.lr h3{font-size:15px;font-weight:700;line-height:1.28}.lr p{font-size:12.5px;color:var(--mute);margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.foot{text-align:center;color:var(--mute);font-size:12px;padding:22px 0 30px}
+@media (min-width:640px){
+  .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .s-lead,.s-lr{grid-column:span 2}
+}
+@media (min-width:900px){
+  .bento{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .s-lead{grid-column:span 2}.s-lr{grid-column:span 3}
+  .lr{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:1180px){
+  .bento{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .s-lead{grid-column:span 2;grid-row:span 2}
+  .s-lr{grid-column:span 3}.s-welt{grid-row:span 2}
+  .lr{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .lr a{grid-template-columns:1fr;align-items:start}.lr .ph{width:100%;height:120px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hello"><div><h1>{{ greeting }}, Adrian</h1><p>{{ long_date(now) }} · {{ e.edition }}</p></div><span class="pill">🛡 Spoilerfrei</span></div>
+<main class="bento">
+  {% if weather %}{% set ic = weather.current.weather_code|wx(1) %}
+  <section class="t wx s-wx {{ 'sun' if ic in ['sun','sun-cloud'] else ('rain' if ic in ['rain','drizzle','storm','sleet'] else '') }}">
+    <div class="now"><div><div class="temp" data-live="temp">{{ weather.current.temperature_2m|num }}°</div><div class="cond" data-live="cond">{{ weather.current.weather_code|wx }}</div><div class="sub">Brandenburg an der Havel{% if weather.days %} · H {{ weather.days[0].max|num }}° T {{ weather.days[0].min|num }}°{% endif %}</div></div></div>
+    <div class="hrs">{% for h in weather.hours[:6] %}<div><b>{{ h.temp|num }}°</b>{{ h.time|hhmm }}</div>{% endfor %}</div>
+    <div class="days">{% for d in weather.days[1:4] %}<div><span>{{ WD_SHORT[d.date.weekday()] }}</span><b>{{ d.max|num }}°</b></div>{% endfor %}</div>
+  </section>{% endif %}
+
+  {% if lead %}<a class="t lead s-lead" href="{{ lead.url }}">{% if lead.image %}<img src="{{ lead.image }}" alt="" onerror="this.remove()">{% endif %}<span><span class="chip">{{ lead.tag or lead.source }}</span></span><h2>{{ lead.title }}</h2><p>{{ lead.summary }}</p></a>{% endif %}
+
+  <section class="t s-welt" style="--c:var(--welt)">
+    <div class="t-h"><i>🌍</i>Welt<small>{{ welt_rest|length }}</small></div>
+    <ol class="items">{% for it in welt_rest[:7] %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a><div class="m">{{ it.source }} · {{ it.published|ago }}</div></li>{% endfor %}</ol>
+  </section>
+
+  <section class="t" style="--c:var(--mlb)">
+    <div class="t-h"><i>⚾</i>MLB<small>Hot Stove</small></div>
+    {% if e.hidden.mlb %}<div class="shield">🛡 {{ e.hidden.mlb }} Ergebnisse versteckt</div>{% endif %}
+    <ol class="items">{% for it in s.mlb[:6] %}<li>{% if it.favorite %}<span class="chip {{ 'sd' if it.favorite == 'padres' else 'ath' }}">{{ favorites[it.favorite].name }}</span>{% endif %}<a href="{{ it.url }}"><h3>{{ it.title }}</h3></a><div class="m">{{ it.published|ago }}</div></li>{% endfor %}</ol>
+  </section>
+
+  <section class="t" style="--c:var(--nba)">
+    <div class="t-h"><i>🏀</i>NBA<small>Trades & Gerüchte</small></div>
+    {% if e.hidden.nba %}<div class="shield">🛡 {{ e.hidden.nba }} Ergebnisse versteckt</div>{% endif %}
+    <ol class="items">{% for it in s.nba[:6] %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a><div class="m">{{ it.published|ago }}</div></li>{% endfor %}</ol>
+  </section>
+
+  <section class="t" style="--c:var(--fb)">
+    <div class="t-h"><i>⚽</i>Hertha BSC<small>{{ e.hertha.league if e.hertha }}</small></div>
+    {% set h = e.hertha %}{% if h %}
+    {% if h.next %}<div class="score"><b>{{ h.next.home }}</b><span class="vs">{{ h.next.when|short_day }}<br>{{ h.next.when|hhmm }}</span><b>{{ h.next.away }}</b></div>{% endif %}
+    <table class="mini">{% for r in h.table[:4] %}<tr{% if r.hertha %} class="me"{% endif %}><td>{{ r.rank }}. {{ r.team }}</td><td>{{ r.points }}</td></tr>{% endfor %}</table>{% endif %}
+    <ol class="items">{% for it in s.fussball[:3] %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a></li>{% endfor %}</ol>
+  </section>
+
+  <section class="t" style="--c:var(--bb)">
+    <div class="t-h"><i>🦅</i>Brandenburg<small>rbb24 · tagesschau</small></div>
+    <ol class="items">{% for it in s.brandenburg[:6] %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a>{% if loop.first %}<p>{{ it.summary }}</p>{% endif %}<div class="m">{{ it.published|ago }}</div></li>{% endfor %}</ol>
+  </section>
+
+  <section class="t s-lr" style="--c:var(--lr)">
+    <div class="t-h"><i>📖</i>Lesestoff<small>3 Texte für heute</small></div>
+    <div class="lr">{% for it in e.longreads %}<a href="{{ it.url }}"><span class="ph">{% if it.image %}<img src="{{ it.image }}" alt="" onerror="this.remove()">{% endif %}{{ loop.index if not it.image }}</span><span><h3>{{ it.title }}</h3><p>{{ it.why or it.summary }}</p></span></a>{% endfor %}</div>
+  </section>
+</main>
+<p class="foot">Nächste Ausgaben um 6, 13 und 19 Uhr</p>
+</div>
+<script>window.BRIEFING={lat:{{ e.location.lat }},lon:{{ e.location.lon }}};</script><script src="app.js" defer></script>
+</body></html>

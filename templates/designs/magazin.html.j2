@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Feuilleton · {{ e.edition }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f3ec;--card:#fffdf9;--fg:#24211d;--mute:#857d71;--hair:#e4ddd0;--acc:#b5532f;--deep:#2b3a35;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1816;--card:#22201d;--fg:#efe9df;--mute:#9b9284;--hair:#34302b;--acc:#e0825d;--deep:#0f1513;color-scheme:dark}}
+*,*::before,*::after{box-sizing:border-box}h1,h2,h3,p,ol,ul{margin:0;padding:0}ol,ul{list-style:none}a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400}
+.wrap{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,64px)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:13px;color:var(--mute)}
+header .brand{font:italic 30px/1 "Instrument Serif",serif;color:var(--fg)}
+header .wx{display:flex;gap:8px;align-items:center}
+header .wx b{font:400 26px/1 "Instrument Serif",serif;color:var(--fg)}
+/* Cover */
+.cover{position:relative;display:grid;border-radius:4px;overflow:hidden;background:var(--deep);color:#fff;min-height:min(78vh,720px)}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.72))}
+.cover .in{position:relative;z-index:1;align-self:end;padding:clamp(20px,5vw,64px);max-width:980px}
+.cover .k{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.cover h1{font:400 clamp(40px,7vw,104px)/.95 "Instrument Serif",serif;letter-spacing:-.01em;margin:12px 0 16px}
+.cover p{font-size:clamp(15px,1.4vw,19px);max-width:60ch;opacity:.9}
+.greet{text-align:center;padding:clamp(40px,7vw,96px) 0 clamp(24px,4vw,48px)}
+.greet h2{font:italic 400 clamp(34px,5vw,64px)/1 "Instrument Serif",serif}
+.greet p{color:var(--mute);margin-top:12px;font-size:15px}
+.chapter{display:flex;align-items:baseline;gap:16px;margin:clamp(40px,6vw,80px) 0 22px;border-bottom:1px solid var(--hair);padding-bottom:12px}
+.chapter h2{font:400 clamp(36px,4.6vw,60px)/1 "Instrument Serif",serif}
+.chapter span{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.chapter small{margin-left:auto;color:var(--mute);font-size:13px}
+.cards{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.card{background:var(--card);border-radius:4px;padding:22px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--hair)}
+.card .k{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
+.card h3{font:400 26px/1.08 "Instrument Serif",serif}
+.card.big h3{font-size:clamp(30px,3vw,42px)}
+.card p{font-size:14.5px;color:var(--mute);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card .m{font-size:12px;color:var(--mute);margin-top:auto}
+.card.fav{background:var(--deep);color:#f4efe6;border-color:var(--deep)}
+.card.fav p,.card.fav .m{color:#b9c3bd}
+.card.fav .k{color:#f2c46d}
+.note{font:italic 18px/1.3 "Instrument Serif",serif;color:var(--acc);margin:-10px 0 18px}
+/* Lesestoff als Doppelseiten */
+.feature{display:grid;gap:22px;padding:28px 0;border-bottom:1px solid var(--hair);align-items:center}
+.feature .ph{aspect-ratio:4/3;background:linear-gradient(135deg,var(--hair),var(--bg));border-radius:4px;overflow:hidden}
+.feature .ph img{width:100%;height:100%;object-fit:cover}
+.feature .no{font:italic 64px/1 "Instrument Serif",serif;color:var(--acc)}
+.feature h3{font:400 clamp(32px,4vw,56px)/1 "Instrument Serif",serif;margin:8px 0 12px}
+.feature p{font-size:16px;color:var(--mute);max-width:52ch}
+.feature .why{font:italic 22px/1.3 "Instrument Serif",serif;color:var(--fg);margin-bottom:10px}
+.feature .src{display:inline-block;margin-top:14px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid var(--acc);padding-bottom:2px}
+.side{background:var(--card);border:1px solid var(--hair);border-radius:4px;padding:22px}
+.side h4{font:400 28px/1 "Instrument Serif",serif;margin-bottom:12px}
+.side table{width:100%;border-collapse:collapse;font-size:14px}.side td{padding:7px 0;border-top:1px solid var(--hair)}.side td:last-child{text-align:right;font-weight:600}
+.side tr.me td{color:var(--acc);font-weight:600}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:13px;color:var(--mute)}.days b{display:block;font:400 30px/1.1 "Instrument Serif",serif;color:var(--fg)}
+.list li{padding:14px 0;border-top:1px solid var(--hair)}.list h3{font:400 23px/1.12 "Instrument Serif",serif}.list .m{font-size:12px;color:var(--mute);margin-top:4px}
+footer{text-align:center;color:var(--mute);font-size:12.5px;padding:60px 0 50px}
+footer .brand{display:block;font:italic 34px/1 "Instrument Serif",serif;color:var(--fg);margin-bottom:8px}
+@media (max-width:639px){
+  header .date{display:none}
+  .cover{min-height:72vh;margin:0 calc(-1 * clamp(16px,4vw,64px));border-radius:0}
+  .cards.scroll{grid-auto-flow:column;grid-auto-columns:82%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px 6px;scrollbar-width:none}
+  .cards.scroll .card{scroll-snap-align:start}
+}
+@media (min-width:640px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card.big{grid-column:span 2}
+  .feature{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px)}
+  .feature:nth-child(even) .ph{order:2}
+  .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
+}
+@media (min-width:1180px){
+  .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card.big{grid-column:span 2;grid-row:span 2;justify-content:flex-end;min-height:360px}
+  .sport{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px}
+  .sport .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="brand">Feuilleton</span>
+  <span class="date">{{ long_date(now) }} · {{ e.edition }}</span>
+  {% if weather %}<span class="wx"><b data-live="temp">{{ weather.current.temperature_2m|num }}°</b><span data-live="cond">{{ weather.current.weather_code|wx }}</span></span>{% endif %}
+</header>
+
+{% if lead %}
+<a class="cover" href="{{ lead.url }}">
+  {% if lead.image %}<img src="{{ lead.image }}" alt="" onerror="this.remove()">{% endif %}
+  <div class="in"><div class="k">{{ lead.tag or lead.source }} · Die Welt</div><h1>{{ lead.title }}</h1><p>{{ lead.summary }}</p></div>
+</a>
+{% endif %}
+
+<section class="greet">
+  <h2>{{ greeting }}, Adrian.</h2>
+  <p>{% if weather %}{{ weather.current.weather_code|wx }} in Brandenburg an der Havel, {{ weather.current.temperature_2m|num }} Grad{% if weather.days %}, später bis {{ weather.days[0].max|num }} Grad{% endif %}. {% endif %}Hier ist, was heute zählt.</p>
+</section>
+
+<div class="chapter"><span>I</span><h2>Lesestoff</h2><small>Drei Texte, die sich lohnen</small></div>
+<div>
+  {% for it in e.longreads %}
+  <article class="feature">
+    <a class="ph" href="{{ it.url }}">{% if it.image %}<img src="{{ it.image }}" alt="" loading="lazy" onerror="this.remove()">{% endif %}</a>
+    <div><div class="no">{{ ['Eins','Zwei','Drei'][loop.index0] }}</div><h3><a href="{{ it.url }}">{{ it.title }}</a></h3>{% if it.why %}<p class="why">{{ it.why }}</p>{% endif %}<p>{{ it.summary }}</p><a class="src" href="{{ it.url }}">{{ it.source }} lesen</a></div>
+  </article>
+  {% endfor %}
+</div>
+
+<div class="chapter"><span>II</span><h2>Die Welt</h2><small>{{ welt_rest|length }} weitere Meldungen</small></div>
+<div class="cards scroll">
+  {% for it in welt_rest[:6] %}<a class="card{% if loop.first %} big{% endif %}" href="{{ it.url }}"><span class="k">{{ it.tag or it.source }}</span><h3>{{ it.title }}</h3><p>{{ it.summary }}</p><span class="m">{{ it.source }} · {{ it.published|ago }}</span></a>{% endfor %}
+</div>
+
+<div class="sport">
+  <div>
+    <div class="chapter"><span>III</span><h2>Baseball</h2><small>ohne Ergebnisse</small></div>
+    {% if e.hidden.mlb %}<p class="note">{{ e.hidden.mlb }} Meldungen mit Ergebnissen haben wir für dich weggelegt.</p>{% endif %}
+    <div class="cards scroll">{% for it in s.mlb[:6] %}<a class="card{% if it.favorite %} fav{% endif %}" href="{{ it.url }}"><span class="k">{{ favorites[it.favorite].name if it.favorite else it.source }}</span><h3>{{ it.title }}</h3><span class="m">{{ it.published|ago }}</span></a>{% endfor %}</div>
+  </div>
+  <div>
+    <div class="chapter"><span>IV</span><h2>Basketball</h2><small>ohne Ergebnisse</small></div>
+    {% if e.hidden.nba %}<p class="note">{{ e.hidden.nba }} Meldungen mit Ergebnissen haben wir für dich weggelegt.</p>{% endif %}
+    <div class="cards scroll">{% for it in s.nba[:6] %}<a class="card" href="{{ it.url }}"><span class="k">{{ it.source }}</span><h3>{{ it.title }}</h3><span class="m">{{ it.published|ago }}</span></a>{% endfor %}</div>
+  </div>
+</div>
+
+<div class="chapter"><span>V</span><h2>Hertha &amp; Bundesliga</h2></div>
+<div class="two">
+  <ol class="list">{% for it in s.fussball[:6] %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a><div class="m">{{ 'Hertha · ' if it.hertha }}{{ it.source }} · {{ it.published|ago }}</div></li>{% endfor %}</ol>
+  {% set h = e.hertha %}{% if h %}<aside class="side"><h4>{{ h.league }}</h4>
+    {% if h.next %}<p style="font-size:14px;margin-bottom:12px">Als Nächstes: <b>{{ h.next.home }} – {{ h.next.away }}</b>, {{ h.next.when|short_day }} um {{ h.next.when|hhmm }}</p>{% endif %}
+    <table>{% for r in h.table %}<tr{% if r.hertha %} class="me"{% endif %}><td>{{ r.rank }}. {{ r.team }}</td><td>{{ r.points }}</td></tr>{% endfor %}</table></aside>{% endif %}
+</div>
+
+<div class="chapter"><span>VI</span><h2>Brandenburg</h2></div>
+<div class="two">
+  <ol class="list">{% for it in s.brandenburg %}<li><a href="{{ it.url }}"><h3>{{ it.title }}</h3></a><div class="m">{{ it.source }} · {{ it.published|ago }}</div></li>{% endfor %}</ol>
+  {% if weather %}<aside class="side"><h4>Das Wetter</h4><div class="days">{% for d in weather.days[:4] %}<div>{{ WD_SHORT[d.date.weekday()] }}<b>{{ d.max|num }}°</b>{{ d.min|num }}°</div>{% endfor %}</div></aside>{% endif %}
+</div>
+
+<footer><span class="brand">Feuilleton</span>{{ e.edition }} vom {{ long_date(now) }} · Nächste Ausgaben um 6, 13 und 19 Uhr</footer>
+</div>
+<script>window.BRIEFING={lat:{{ e.location.lat }},lon:{{ e.location.lon }}};</script><script src="app.js" defer></script>
+</body></html>

@@ -73,6 +73,7 @@ def main() -> None:
     ap.add_argument("--out", default="site")
     ap.add_argument("--fixture", help="Rohdaten aus Datei statt aus dem Netz")
     ap.add_argument("--dump", help="Rohdaten zusätzlich in diese Datei schreiben")
+    ap.add_argument("--design", help="Entwurf aus templates/designs/ statt der Standardvorlage")
     ap.add_argument("--now", help="Zeitpunkt simulieren (ISO, Berliner Zeit)")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -147,7 +148,7 @@ def main() -> None:
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    (out / "index.html").write_text(render(edition, now_local), encoding="utf-8")
+    (out / "index.html").write_text(render(edition, now_local, args.design), encoding="utf-8")
     (out / "data.json").write_text(json.dumps(edition, default=to_json, ensure_ascii=False))
     for f in (ROOT / "static").iterdir():
         shutil.copy(f, out / f.name)

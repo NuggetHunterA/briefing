@@ -123,9 +123,9 @@ def weather_view(w: dict | None, now: datetime) -> dict | None:
     return {"current": w.get("current", {}), "hours": hours, "days": days, "alerts": w.get("alerts", [])}
 
 
-def render(edition: dict, now: datetime) -> str:
+def render(edition: dict, now: datetime, design: str | None = None) -> str:
     env = make_env(now)
-    tpl = env.get_template("index.html.j2")
+    tpl = env.get_template(f"designs/{design}.html.j2" if design else "index.html.j2")
     welt = edition["sections"]["welt"]
     lead = next((it for it in welt[:3] if it.get("image")), welt[0] if welt else None)
     welt_rest = [it for it in welt if it is not lead]
@@ -133,4 +133,5 @@ def render(edition: dict, now: datetime) -> str:
         e=edition, s=edition["sections"], now=now, lead=lead, welt_rest=welt_rest,
         weather=weather_view(edition["weather"], now), favorites=config.MLB_FAVORITES,
         issue_no=now.timetuple().tm_yday, utc_now=datetime.now(timezone.utc),
+        greeting="Guten Morgen" if now.hour < 11 else ("Guten Tag" if now.hour < 17 else "Guten Abend"),
     )
