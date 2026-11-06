@@ -150,7 +150,10 @@ def main() -> None:
     (out / "index.html").write_text(render(edition, now_local), encoding="utf-8")
     (out / "data.json").write_text(json.dumps(edition, default=to_json, ensure_ascii=False))
     for f in (ROOT / "static").iterdir():
-        shutil.copy(f, out / f.name)
+        if f.is_dir():
+            shutil.copytree(f, out / f.name)
+        else:
+            shutil.copy(f, out / f.name)
     log.info("Fertig: %s (%s, Redaktion: %s)", out / "index.html", edition["edition"], edition["editor"])
 
 

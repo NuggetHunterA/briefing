@@ -132,6 +132,34 @@ EVENING_LINES = [
 ]
 
 
+VIGNETTE_DIR = Path(__file__).resolve().parent.parent / "static" / "vignette"
+SCENE_DE = {"morning": "morgen", "noon": "mittag", "evening": "abend"}
+WX_KEY = {"sun": "sonne", "sun-cloud": "sonne", "cloud": "wolken", "fog": "nebel", "drizzle": "regen",
+          "rain": "regen", "sleet": "regen", "snow": "schnee", "storm": "gewitter"}
+WX_FALLBACK = {"gewitter": ["gewitter", "regen", "wolken"], "regen": ["regen", "wolken"], "schnee": ["schnee", "wolken"],
+               "nebel": ["nebel", "wolken"], "wolken": ["wolken", "sonne"], "sonne": ["sonne", "wolken"]}
+STYLE_LABEL = {"oel": "KI-Ölgemälde", "foto": "KI-Foto"}
+
+
+def vignette_image(scene: str, kind: str, now: datetime) -> dict | None:
+    """Passendes KI-Bild aus static/vignette/<szene>-<wetter>-<stil>.webp; Stil wechselt täglich."""
+    if not VIGNETTE_DIR.is_dir():
+        return None
+    have = {p.stem for p in VIGNETTE_DIR.glob("*.webp") if not p.stem.endswith("-klein")}
+    styles = ["oel", "foto"] if now.toordinal() % 2 == 0 else ["foto", "oel"]
+    sc = SCENE_DE[scene]
+    for wx in WX_FALLBACK[WX_KEY.get(kind, "wolken")]:
+        if scene == "evening" and wx == "sonne":
+            wx = "klar"
+        for st in styles:
+            name = f"{sc}-{wx}-{st}"
+            if name in have:
+                return {"src": f"vignette/{name}.webp",
+                        "small": f"vignette/{name}-klein.webp" if f"{name}-klein" in {p.stem for p in VIGNETTE_DIR.glob('*-klein.webp')} else None,
+                        "label": STYLE_LABEL[st]}
+    return None
+
+
 def mood_view(weather: dict | None, now: datetime) -> dict:
     """Stimmungsbild: Szene nach Tageszeit, Details nach Wetter."""
     scene = "morning" if now.hour < 11 else ("noon" if now.hour < 17 else "evening")
@@ -154,7 +182,7 @@ def mood_view(weather: dict | None, now: datetime) -> dict:
         if day and day[0].get("sunset"):
             caption += f" Die Sonne ist um {as_dt(day[0]['sunset']).strftime('%H:%M')} untergegangen." if as_dt(day[0]["sunset"]) <= now else ""
     clear = kind in ("sun", "sun-cloud")
-    return {"scene": scene, "kind": kind, "sunny": clear, "caption": caption,
+    return {"scene": scene, "kind": kind, "sunny": clear, "image": vignette_image(scene, kind, now), "caption": caption,
             "wet": kind in ("rain", "drizzle", "storm", "sleet"), "snow": kind == "snow",
             "fog": kind == "fog", "storm": kind == "storm", "cloudy": kind in ("cloud", "fog") or not clear}
 

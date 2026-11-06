@@ -74,8 +74,12 @@
 
 <div class="mood" aria-label="Stimmungsbild">
   <figure>
-    <div class="mood-frame">{% include "mood.svg.j2" %}</div>
-    <figcaption><span>{{ mood.caption }}</span><small>Zeichnung · {{ e.edition }}</small></figcaption>
+    <div class="mood-frame">
+      {% if mood.image %}
+      <img class="mood-art mood-img" src="{{ mood.image.src }}"{% if mood.image.small %} srcset="{{ mood.image.small }} 960w, {{ mood.image.src }} 2000w" sizes="100vw"{% endif %} alt="{{ mood.caption }}" decoding="async" fetchpriority="high">
+      {% else %}{% include "mood.svg.j2" %}{% endif %}
+    </div>
+    <figcaption><span>{{ mood.caption }}</span><small>{{ mood.image.label if mood.image else 'Zeichnung' }} · {{ e.edition }}</small></figcaption>
   </figure>
 </div>
 
