@@ -199,8 +199,11 @@ def fetch_mlb_transactions(now: datetime, days: int = 4) -> list[dict]:
             "favorite": fav,
         })
     # "X elected free agency" desselben Teams und Tages zu einer Zeile zusammenfassen
-    grouped, fa = [], {}
+    grouped, fa, seen = [], {}, set()
     for t in out:
+        if t["text"] in seen:  # Trades stehen bei beiden Teams
+            continue
+        seen.add(t["text"])
         m = FA_RE.match(t["text"])
         if m and t["favorite"]:
             key = (t["favorite"], t["date"])

@@ -80,7 +80,7 @@
     {% if lead %}
     <article class="lead">
       {% if lead.image %}
-      <a class="lead-img" href="{{ lead.url }}" target="_blank" rel="noopener"><img src="{{ lead.image }}" alt="" loading="eager" decoding="async"></a>
+      <a class="lead-img" href="{{ lead.url }}" target="_blank" rel="noopener"><img src="{{ lead.image }}" alt="" onerror="this.parentNode.remove()" loading="eager" decoding="async"></a>
       {% endif %}
       <div class="lead-body">
         <p class="kicker">{{ lead.tag or lead.source }}</p>
@@ -243,7 +243,7 @@
       {% for it in e.longreads %}
       <article class="longread">
         <span class="numeral" aria-hidden="true">{{ ['I','II','III','IV'][loop.index0] }}</span>
-        {% if it.image %}<a class="lr-img" href="{{ it.url }}" target="_blank" rel="noopener"><img src="{{ it.image }}" alt="" loading="lazy" decoding="async"></a>{% endif %}
+        {% if it.image %}<a class="lr-img" href="{{ it.url }}" target="_blank" rel="noopener"><img src="{{ it.image }}" alt="" onerror="this.parentNode.remove()" loading="lazy" decoding="async"></a>{% endif %}
         <p class="kicker">{{ it.source }}</p>
         <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
         {% if it.why %}<p class="why">{{ it.why }}</p>{% endif %}
