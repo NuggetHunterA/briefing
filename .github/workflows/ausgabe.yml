@@ -1,10 +1,12 @@
 name: Ausgabe bauen
 
 on:
-  # 6, 13 und 19 Uhr Berliner Zeit. GitHub rechnet in UTC, deshalb sind Sommer- und
-  # Winterzeit eingetragen; der erste Schritt lässt nur den passenden Lauf weiter.
+  # 6, 13 und 19 Uhr Berliner Zeit. GitHub rechnet in UTC: eine Zeile für Sommer-, eine für
+  # Winterzeit. Der erste Schritt lässt nur die zur aktuellen Zeit passende Zeile weiter.
+  # Geprüft wird die auslösende Zeile, nicht die Uhrzeit, weil GitHub geplante Läufe oft verspätet startet.
   schedule:
-    - cron: "3 4,5,11,12,17,18 * * *"
+    - cron: "3 4,11,17 * * *"   # Sommerzeit (UTC+2)
+    - cron: "3 5,12,18 * * *"   # Winterzeit (UTC+1)
   workflow_dispatch:
   push:
 
@@ -25,11 +27,12 @@ jobs:
       - name: Passende Uhrzeit?
         id: gate
         run: |
-          hour=$(TZ=Europe/Berlin date +%H)
-          if [ "${{ github.event_name }}" != "schedule" ] || [[ "$hour" =~ ^(06|13|19)$ ]]; then
+          offset=$(TZ=Europe/Berlin date +%z)
+          [ "$offset" = "+0200" ] && want="3 4,11,17 * * *" || want="3 5,12,18 * * *"
+          if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ github.event.schedule }}" = "$want" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Berliner Zeit $hour Uhr: kein Ausgabetermin."
+            echo "Zeile '${{ github.event.schedule }}' gilt nicht bei Berliner Offset $offset."
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
 
