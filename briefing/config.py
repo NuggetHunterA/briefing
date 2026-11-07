@@ -56,9 +56,7 @@ FEEDS = {
     # "tag": grobe Einordnung als Hinweis für Claude; "sport" wird zusätzlich auf MLB/NBA-Spoiler geprüft
     "longreads": [
         {"name": "FanGraphs", "url": "https://www.fangraphs.com/blogs/feed/", "tag": "sport"},
-        {"name": "The Ringer", "url": "https://www.theringer.com/feed/", "tag": "sport"},
         {"name": "Spielverlagerung", "url": "https://spielverlagerung.de/feed/", "tag": "sport"},
-        {"name": "11FREUNDE", "url": "https://11freunde.de/feed", "tag": "sport"},
         {"name": "The Guardian US Sport", "url": "https://www.theguardian.com/sport/us-sport/rss", "tag": "sport"},
         {"name": "JSTOR Daily", "url": "https://daily.jstor.org/feed/", "tag": "geschichte"},
         {"name": "Smithsonian", "url": "https://www.smithsonianmag.com/rss/history/", "tag": "geschichte"},
