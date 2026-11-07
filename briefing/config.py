@@ -15,7 +15,7 @@ EDITIONS = {6: "Morgenausgabe", 13: "Mittagsausgabe", 19: "Abendausgabe"}
 FIRST_ISSUE_DATE = "2026-11-06"
 
 # Wie viele Meldungen pro Rubrik höchstens gezeigt werden (hält das Layout planbar)
-LIMITS = {"mlb": 7, "nba": 6, "fussball": 8, "brandenburg": 7, "welt": 8, "longreads": 3}
+LIMITS = {"mlb": 7, "nba": 6, "fussball": 5, "brandenburg": 7, "welt": 8, "longreads": 3}
 
 # Wie alt eine Meldung höchstens sein darf (Stunden)
 MAX_AGE_HOURS = {"mlb": 72, "nba": 48, "fussball": 48, "brandenburg": 48, "welt": 24, "longreads": 24 * 10}
@@ -95,7 +95,9 @@ FOOTBALL_LEAGUES = [
     {"shortcut": "bl2", "label": "2. Bundesliga", "short": "2. BL"},
 ]
 # Höchstens so viele Hertha-Meldungen oben in der Fußball-Rubrik, danach wechseln sich die Ligen ab
-HERTHA_MAX_NEWS = 3
+HERTHA_MAX_NEWS = 2
+# Höchstens so viele Spiele pro Liga (nur Spiele von gestern und heute werden gezeigt)
+FOOTBALL_MAX_MATCHES = 5
 
 # Spielberichte (mit Ergebnissen) liegen auf der eigenen Recap-Seite, verlinkt in MLB und NBA
 SPORT_RECAP_URL = "https://nuggethuntera.github.io/sport-recap/"

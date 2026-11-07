@@ -9,6 +9,7 @@ import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import feedparser
 import requests
@@ -250,7 +251,7 @@ def _hertha_box(label: str, table: list, matches: list) -> dict | None:
     pos = next((i for i, row in enumerate(table) if _is_hertha(row.get("teamName"))), None)
     if pos is None:
         return None
-    lo = max(0, min(pos - 2, len(table) - 5))
+    lo = max(0, min(pos - 1, len(table) - 3))
     rows = [{
         "rank": i + 1,
         "team": row.get("shortName") or row.get("teamName"),
@@ -258,7 +259,7 @@ def _hertha_box(label: str, table: list, matches: list) -> dict | None:
         "diff": row.get("goalDiff"),
         "points": row.get("points"),
         "hertha": i == pos,
-    } for i, row in enumerate(table) if lo <= i < lo + 5]
+    } for i, row in enumerate(table) if lo <= i < lo + 3]
     last = nxt = None
     mine = [x for x in matches if _is_hertha(x["team1"]["teamName"]) or _is_hertha(x["team2"]["teamName"])]
     mine.sort(key=lambda x: x.get("matchDateTimeUTC") or "")
@@ -271,62 +272,61 @@ def _hertha_box(label: str, table: list, matches: list) -> dict | None:
     return {"league": label, "rank": pos + 1, "table": rows, "last": last, "next": nxt}
 
 
-def _round_view(label: str, short: str, table: list, matches: list, german: set[str] | None = None) -> dict | None:
-    """Letzter gespielter Spieltag (alle Ergebnisse), nächster Spieltag und Tabellenspitze."""
-    if not matches:
-        return None
-    groups: dict[int, list] = {}
+def _recent_view(label: str, matches: list, start: datetime, end: datetime, german: set[str] | None = None) -> dict | None:
+    """Nur Spiele von gestern und heute (Berliner Zeit). Ohne solche Spiele bleibt die Liga weg."""
+    picked = []
     for x in matches:
-        groups.setdefault((x.get("group") or {}).get("groupOrderID") or 0, []).append(x)
-    played = [g for g, xs in groups.items() if any(x.get("matchIsFinished") for x in xs)]
-    upcoming = [g for g, xs in groups.items() if any(not x.get("matchIsFinished") for x in xs)]
-    last_g = max(played) if played else None
-    next_g = min((g for g in upcoming if last_g is None or g > last_g), default=None)
-
-    def view(g):
-        if g is None:
-            return None
-        xs = sorted(groups[g], key=lambda x: x.get("matchDateTimeUTC") or "")
-        ms = [_match(x) for x in xs]
-        for mm, x in zip(ms, xs):
-            names = (x["team1"]["teamName"], x["team2"]["teamName"])
-            mm["hertha"] = any(_is_hertha(n) for n in names)
-            mm["german"] = bool(german) and any(n in german for n in names)
-        # Hertha zuerst, in der Champions League die deutschen Klubs
-        ms.sort(key=lambda mm: (not mm["hertha"], not mm["german"]))
-        start = min((mm["when"] for mm in ms if mm["when"]), default=None)
-        return {"name": ms[0]["matchday"] if ms else "", "matches": ms, "start": start}
-
-    last, nxt = view(last_g), view(next_g)
-    top = [{"rank": i + 1, "team": r.get("shortName") or r.get("teamName"), "points": r.get("points"),
-            "hertha": _is_hertha(r.get("teamName"))} for i, r in enumerate(table[:3])]
-    return {"label": label, "short": short, "last": last, "next": nxt, "top": top}
+        mm = _match(x)
+        if not mm["when"] or not (start <= mm["when"] < end):
+            continue
+        names = (x["team1"]["teamName"], x["team2"]["teamName"])
+        mm["hertha"] = any(_is_hertha(n) for n in names)
+        mm["german"] = bool(german) and any(n in german for n in names)
+        picked.append(mm)
+    if not picked:
+        return None
+    picked.sort(key=lambda mm: mm["when"])
+    total = len(picked)
+    if german is not None:  # Champions League: nur deutsche Klubs, falls welche gespielt haben
+        picked = [mm for mm in picked if mm["german"]] or picked
+    picked.sort(key=lambda mm: not mm["hertha"])
+    shown = picked[: config.FOOTBALL_MAX_MATCHES]
+    return {"label": label, "matchday": shown[0]["matchday"], "matches": shown, "more": total - len(shown)}
 
 
-def _find_cl(season: int) -> str | None:
-    """Kürzel der Champions League bei OpenLigaDB suchen (wechselt je Saison)."""
+def _find_cl(season: int) -> list[str]:
+    """Kürzel der Champions League bei OpenLigaDB suchen (wechseln je Saison). Alle Treffer zählen,
+    falls Ligaphase und K.-o.-Runde dort einmal getrennt geführt werden."""
     r = get(f"{config.OPENLIGADB}/getavailableleagues")
     if r is None:
-        return None
+        return []
+    found = []
     for lg in r.json() or []:
         name = (lg.get("leagueName") or "").lower()
         if (str(lg.get("leagueSeason")) == str(season) and "champions league" in name
-                and not any(w in name for w in ("frauen", "women", "youth", "uefa youth"))):
+                and not any(w in name for w in ("frauen", "women", "youth"))):
             log.info("fussball     OpenLigaDB CL-Kürzel: %s (%s)", lg.get("leagueShortcut"), lg.get("leagueName"))
-            return lg.get("leagueShortcut")
-    log.info("fussball     OpenLigaDB: keine Champions League für Saison %s gefunden", season)
-    return None
+            found.append(lg.get("leagueShortcut"))
+    if not found:
+        log.info("fussball     OpenLigaDB: keine Champions League für Saison %s gefunden", season)
+    return found
 
 
 def fetch_football(now: datetime) -> dict:
     """Hertha-Kasten plus Ergebnisse aus 1. Bundesliga, 2. Bundesliga und Champions League."""
     season = _season(now)
+    local = now.astimezone(ZoneInfo(config.TIMEZONE))
+    today = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    start, end = today - timedelta(days=1), today + timedelta(days=1)
     leagues = [(lg["shortcut"], lg["label"], lg["short"]) for lg in config.FOOTBALL_LEAGUES]
-    cl = _find_cl(season)
-    if cl:
-        leagues.append((cl, "Champions League", "CL"))
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    cl_codes = _find_cl(season)
+    with ThreadPoolExecutor(max_workers=4) as pool:
         data = list(pool.map(lambda lg: _league_data(lg[0], season), leagues))
+        cl_data = list(pool.map(lambda sc: _league_data(sc, season), cl_codes))
+    cl = "ucl"
+    if cl_codes:  # Ligaphase und K.-o.-Runde zusammenführen
+        leagues.append((cl, "Champions League", "CL"))
+        data.append(([], [x for _, ms in cl_data for x in ms]))
     hertha, rounds = None, []
     german = {row.get("teamName") for sc, (table, _) in zip(leagues, data) if sc[0] in ("bl1", "bl2") for row in table}
     for (shortcut, label, short), (table, matches) in zip(leagues, data):
@@ -334,7 +334,7 @@ def fetch_football(now: datetime) -> dict:
             hertha = _hertha_box(label, table, matches)
             if hertha:
                 log.info("fussball     OpenLigaDB %s Hertha Platz %d", shortcut, hertha["rank"])
-        rv = _round_view(label, short, table, matches, german if shortcut == cl else None)
+        rv = _recent_view(label, matches, start, end, german if shortcut == cl else None)
         log.info("fussball     OpenLigaDB %-8s %3d Spiele, %3d Tabellenzeilen", shortcut, len(matches), len(table))
         if rv:
             rounds.append(rv)
@@ -343,9 +343,15 @@ def fetch_football(now: datetime) -> dict:
 
 def _match(x: dict) -> dict:
     res = None
-    for r in x.get("matchResults") or []:
-        if r.get("resultTypeID") == 2 or r.get("resultName") == "Endergebnis":
-            res = f'{r["pointsTeam1"]}:{r["pointsTeam2"]}'
+    results = x.get("matchResults") or []
+    final = [r for r in results if r.get("resultTypeID") == 2 or r.get("resultName") == "Endergebnis"]
+    extra = [r for r in results if re.search(r"verlängerung|elfmeter", r.get("resultName") or "", re.I)]
+    if final:
+        res = f'{final[-1]["pointsTeam1"]}:{final[-1]["pointsTeam2"]}'
+    if extra and x.get("matchIsFinished"):  # K.-o.-Spiele: Ergebnis nach Verlängerung/Elfmeterschießen
+        r = max(extra, key=lambda r: r.get("resultOrderID") or 0)
+        tag = "n. E." if "elfmeter" in (r.get("resultName") or "").lower() else "n. V."
+        res = f'{r["pointsTeam1"]}:{r["pointsTeam2"]} {tag}'
     when = x.get("matchDateTimeUTC")
     return {
         "home": x["team1"].get("shortName") or x["team1"]["teamName"],

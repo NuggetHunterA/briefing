@@ -235,20 +235,15 @@
       </table>
     </div>
     {% endif %}
-    {% for lg in e.leagues if lg.last or lg.next %}
+    {% for lg in e.leagues if lg.matches %}
     <div class="league">
-      <h4>{{ lg.label }}{% if lg.last %} <span>· {{ lg.last.name }}</span>{% endif %}</h4>
-      {% if lg.last %}
-      {% set shown = 10 %}
+      <h4>{{ lg.label }}{% if lg.matchday %} <span>· {{ lg.matchday }}</span>{% endif %}</h4>
       <ul class="results">
-        {% for m in lg.last.matches[:shown] %}
+        {% for m in lg.matches %}
         <li{% if m.hertha %} class="is-hertha"{% endif %}><span class="h">{{ m.home }}</span><b>{{ m.result or (m.when|hhmm) or '–' }}</b><span class="a">{{ m.away }}</span></li>
         {% endfor %}
       </ul>
-      {% if lg.last.matches|length > shown %}<p class="league-note">+ {{ lg.last.matches|length - shown }} weitere Spiele</p>{% endif %}
-      {% endif %}
-      {% if lg.top %}<p class="league-note"><span class="lbl">Spitze</span> {% for r in lg.top %}{{ r.rank }}. {{ r.team }} {{ r.points }}{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
-      {% if lg.next and lg.next.start %}<p class="league-note"><span class="lbl">Weiter</span> {{ lg.next.name }} ab {{ lg.next.start|short_day }}</p>{% endif %}
+      {% if lg.more %}<p class="league-note">+ {{ lg.more }} weitere Spiele</p>{% endif %}
     </div>
     {% endfor %}
     <ol class="list">
@@ -256,7 +251,7 @@
       <li class="item{% if it.hertha %} fav fav-hertha{% endif %}">
         {% if it.hertha %}<span class="team team-hertha">Hertha</span>{% elif it.league %}<span class="team team-league">{{ it.league }}</span>{% endif %}
         <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
-        {% if loop.index <= 2 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        {% if loop.first and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
         <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
       </li>
       {% else %}
