@@ -53,11 +53,19 @@ FEEDS = {
         {"name": "BBC", "url": "https://feeds.bbci.co.uk/news/world/rss.xml"},
         {"name": "Deutschlandfunk", "url": "https://www.deutschlandfunk.de/nachrichten-100.rss"},
     ],
+    # "tag": grobe Einordnung als Hinweis für Claude; "sport" wird zusätzlich auf MLB/NBA-Spoiler geprüft
     "longreads": [
+        {"name": "The Ringer", "url": "https://www.theringer.com/rss/index.xml", "tag": "sport"},
+        {"name": "FanGraphs", "url": "https://blog.fangraphs.com/feed/", "tag": "sport"},
+        {"name": "JSTOR Daily", "url": "https://daily.jstor.org/feed/", "tag": "geschichte"},
+        {"name": "Smithsonian", "url": "https://www.smithsonianmag.com/rss/history/", "tag": "geschichte"},
         {"name": "The Guardian Long Read", "url": "https://www.theguardian.com/news/series/the-long-read/rss"},
-        {"name": "ProPublica", "url": "https://www.propublica.org/feeds/propublica/main"},
+        {"name": "ProPublica", "url": "https://www.propublica.org/feeds/propublica/main", "tag": "investigativ"},
+        {"name": "CORRECTIV", "url": "https://correctiv.org/feed/", "tag": "investigativ"},
+        {"name": "Rest of World", "url": "https://restofworld.org/feed/latest", "tag": "technik"},
+        {"name": "Atlas Obscura", "url": "https://www.atlasobscura.com/feeds/latest", "tag": "reisen"},
         {"name": "Aeon", "url": "https://aeon.co/feed.rss"},
-        {"name": "Quanta Magazine", "url": "https://www.quantamagazine.org/feed/"},
+        {"name": "Quanta Magazine", "url": "https://www.quantamagazine.org/feed/", "tag": "wissenschaft"},
     ],
 }
 
@@ -93,6 +101,21 @@ SPORT_RECAP_URL = "https://nuggethuntera.github.io/sport-recap/"
 
 # Longreads: Adrians Interessen, wichtigstes zuerst. Claude nutzt die Reihenfolge bei der Auswahl.
 # Leer = neutrale Auswahl (gut geschrieben, substanziell, aktuell).
-LONGREAD_INTERESTS: list[str] = []
+LONGREAD_INTERESTS: list[str] = [
+    "Sport-Hintergründe (Baseball, Basketball, Fußball)",
+    "Geschichte",
+    "Internationale Politik & Konflikte",
+    "Menschen & Reportagen aus dem Alltag",
+    "Investigative Recherchen",
+    "Deutschland & Europa",
+    "Technik & KI",
+    "Reisen & besondere Orte",
+    "Kultur, Medien, Film & Musik",
+    "Wirtschaft & Unternehmen",
+    "Psychologie & Gesundheit",
+    "Klima, Umwelt & Natur",
+    "Wissenschaft & Forschung (Physik, Biologie, Mathematik)",
+    "Philosophie & Ideen",
+]
 
 USER_AGENT = "Mozilla/5.0 (compatible; PersonalBriefing/1.0; private use)"

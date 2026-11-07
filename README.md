@@ -18,7 +18,7 @@ und veröffentlicht sie auf GitHub Pages:
    aussuchen (nach Adrians Interessen-Ranking in `LONGREAD_INTERESTS`, sobald es gesetzt ist). Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
 4. `briefing/render.py` + `templates/index.html.j2` + `static/` erzeugen die Seite.
 
-**Spoiler-Schutz:** Nur MLB und NBA, nur Ergebnisse vom Vortag und von heute. Feste Muster
+**Spoiler-Schutz:** Nur MLB und NBA (auch Sport-Longreads), nur Ergebnisse vom Vortag und von heute. Feste Muster
 (z. B. `5-3`, „recap“, „no-hitter“, „40 points“) greifen immer, Claude prüft zusätzlich den Rest.
 Ältere Meldungen bleiben unverändert.
 

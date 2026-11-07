@@ -95,6 +95,8 @@ def main() -> None:
     sections = curate.prepare(raw["news"], now_utc)
     cutoff = curate.spoiler_cutoff(now_local).astimezone(timezone.utc)
 
+    sections["longreads"] = curate.drop_sport_spoilers(sections["longreads"], cutoff)
+
     prev = previous_edition()
     today = now_local.date().isoformat()
     history = set(prev.get("longread_history", []))

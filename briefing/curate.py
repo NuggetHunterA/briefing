@@ -153,7 +153,7 @@ def prepare(raw: dict[str, list[dict]], now_utc: datetime) -> dict[str, list[dic
         elif section == "longreads":
             # keine Podcasts, Videos oder Audio-Beiträge
             items = [it for it in items if not re.search(r"podcast|/videos?/|/audio/", it["title"] + " " + it["url"], re.I)]
-            items = newest_first(items)
+            items = round_robin(items)  # jede Quelle kommt unter die Kandidaten, nicht nur die fleißigsten
         else:
             items = newest_first(items)
         out[section] = items
@@ -178,6 +178,17 @@ def apply_spoilers(sections: dict[str, list[dict]], llm_spoilers: set[str] | Non
     return hidden
 
 
+def drop_sport_spoilers(items: list[dict], cutoff: datetime) -> list[dict]:
+    """Sport-Longreads vom Vortag oder heute mit klaren Ergebnis-Mustern aussortieren (MLB/NBA spoilerfrei)."""
+    keep = []
+    for it in items:
+        fresh_one = it["published"] is None or it["published"] >= cutoff
+        if it.get("tag") == "sport" and fresh_one and rule_spoiler(it, strict=False):
+            continue
+        keep.append(it)
+    return keep
+
+
 def order_by(items: list[dict], ids: list[str]) -> list[dict]:
     if not ids:
         return items
@@ -189,8 +200,10 @@ def order_by(items: list[dict], ids: list[str]) -> list[dict]:
 
 
 def fallback_longreads(items: list[dict], exclude: set[str]) -> list[dict]:
+    """Ohne Claude: Quellen in der Reihenfolge aus config.FEEDS (nach Adrians Interessen sortiert)."""
+    rank = {f["name"]: i for i, f in enumerate(config.FEEDS["longreads"])}
     picks, used_sources = [], set()
-    for it in newest_first(items):
+    for it in sorted(newest_first(items), key=lambda x: rank.get(x["source"], 99)):
         if it["id"] in exclude or it["source"] in used_sources:
             continue
         picks.append({**it, "why": ""})
