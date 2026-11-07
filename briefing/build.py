@@ -65,11 +65,7 @@ def revive(raw: dict) -> dict:
     raw["football"] = fb
     matches = [(fb.get("hertha") or {}).get(k) for k in ("last", "next")]
     for lg in fb.get("leagues") or []:
-        for k in ("last", "next"):
-            rnd = lg.get(k) or {}
-            matches += rnd.get("matches", [])
-            if isinstance(rnd.get("start"), str):
-                rnd["start"] = datetime.fromisoformat(rnd["start"])
+        matches += lg.get("matches") or []
     for m in matches:
         if m and isinstance(m.get("when"), str):
             m["when"] = datetime.fromisoformat(m["when"])
