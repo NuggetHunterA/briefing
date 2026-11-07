@@ -205,5 +205,5 @@ def render(edition: dict, now: datetime) -> str:
         e=edition, s=edition["sections"], now=now, lead=lead, welt_rest=welt_rest,
         weather=weather_view(edition["weather"], now), favorites=config.MLB_FAVORITES,
         mood=mood_view(weather_view(edition["weather"], now), now),
-        issue_no=issue_number(now), utc_now=datetime.now(timezone.utc),
+        issue_no=issue_number(now), utc_now=datetime.now(timezone.utc), recap_url=config.SPORT_RECAP_URL,
     )

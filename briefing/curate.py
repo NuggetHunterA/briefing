@@ -29,7 +29,34 @@ SOFT_PATTERNS = [
 HARD_RE = re.compile("|".join(HARD_PATTERNS), re.I)
 SOFT_RE = re.compile("|".join(SOFT_PATTERNS), re.I)
 
-FOOTBALL_WORDS = re.compile(r"hertha|union|fußball|bundesliga|energie cottbus|babelsberg|turbine|dfb|kicker", re.I)
+FOOTBALL_WORDS = re.compile(r"hertha|union|fußball|bundesliga|champions league|energie cottbus|babelsberg|turbine|dfb|kicker", re.I)
+
+
+LEAGUE_WORDS = [
+    ("Champions League", re.compile(r"champions league|königsklasse|\bcl\b", re.I)),
+    ("2. Bundesliga", re.compile(r"2\. (fußball-)?bundesliga|zweite liga|zweitliga", re.I)),
+    ("Bundesliga", re.compile(r"bundesliga", re.I)),
+]
+
+
+def league_of(txt: str) -> str | None:
+    return next((name for name, rx in LEAGUE_WORDS if rx.search(txt)), None)
+
+
+def football_mix(items: list[dict]) -> list[dict]:
+    """Ein paar Hertha-Meldungen oben, danach Bundesliga, Champions League und 2. Liga im Wechsel."""
+    hertha = [it for it in items if it["hertha"]][: config.HERTHA_MAX_NEWS]
+    taken = {it["id"] for it in hertha}
+    by_league: dict[str, list[dict]] = {"Bundesliga": [], "Champions League": [], "2. Bundesliga": [], "": []}
+    for it in items:
+        if it["id"] not in taken:
+            by_league.setdefault(it.get("league") or "", []).append(it)
+    rest = []
+    while any(by_league.values()):
+        for lg in by_league:
+            if by_league[lg]:
+                rest.append(by_league[lg].pop(0))
+    return hertha + rest
 
 
 def _text(it: dict) -> str:
@@ -117,15 +144,16 @@ def prepare(raw: dict[str, list[dict]], now_utc: datetime) -> dict[str, list[dic
                 if it["source"].startswith("rbb") and not FOOTBALL_WORDS.search(txt):
                     continue
                 it["hertha"] = it.get("tag") == "Hertha" or any(w in txt for w in config.HERTHA_WORDS)
+                if not it.get("league"):
+                    it["league"] = league_of(txt)
                 keep.append(it)
-            items = newest_first(keep)
-            items.sort(key=lambda x: not x["hertha"])
+            items = football_mix(newest_first(keep))
         elif section == "welt":
             items = round_robin(items)
         elif section == "longreads":
             # keine Podcasts, Videos oder Audio-Beiträge
             items = [it for it in items if not re.search(r"podcast|/videos?/|/audio/", it["title"] + " " + it["url"], re.I)]
-            items = newest_first(items)
+            items = round_robin(items)  # jede Quelle kommt unter die Kandidaten, nicht nur die fleißigsten
         else:
             items = newest_first(items)
         out[section] = items
@@ -150,6 +178,17 @@ def apply_spoilers(sections: dict[str, list[dict]], llm_spoilers: set[str] | Non
     return hidden
 
 
+def drop_sport_spoilers(items: list[dict], cutoff: datetime) -> list[dict]:
+    """Sport-Longreads vom Vortag oder heute mit klaren Ergebnis-Mustern aussortieren (MLB/NBA spoilerfrei)."""
+    keep = []
+    for it in items:
+        fresh_one = it["published"] is None or it["published"] >= cutoff
+        if it.get("tag") == "sport" and fresh_one and rule_spoiler(it, strict=False):
+            continue
+        keep.append(it)
+    return keep
+
+
 def order_by(items: list[dict], ids: list[str]) -> list[dict]:
     if not ids:
         return items
@@ -161,8 +200,10 @@ def order_by(items: list[dict], ids: list[str]) -> list[dict]:
 
 
 def fallback_longreads(items: list[dict], exclude: set[str]) -> list[dict]:
+    """Ohne Claude: Quellen in der Reihenfolge aus config.FEEDS (nach Adrians Interessen sortiert)."""
+    rank = {f["name"]: i for i, f in enumerate(config.FEEDS["longreads"])}
     picks, used_sources = [], set()
-    for it in newest_first(items):
+    for it in sorted(newest_first(items), key=lambda x: rank.get(x["source"], 99)):
         if it["id"] in exclude or it["source"] in used_sources:
             continue
         picks.append({**it, "why": ""})

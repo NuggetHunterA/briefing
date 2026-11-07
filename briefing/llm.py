@@ -15,6 +15,8 @@ import re
 import shutil
 import subprocess
 
+from . import config
+
 log = logging.getLogger("briefing")
 
 PROMPT = """Du bist der Redakteur einer persönlichen Morgenzeitung für Adrian aus Brandenburg an der Havel.
@@ -36,6 +38,12 @@ Aufgaben:
    aktuelle Zeitgeschehen relevant sind. Unterschiedliche Themen und möglichst unterschiedliche Quellen.
    Nichts aus "already_shown". Zu jedem ein Satz "why" auf Deutsch (max. 160 Zeichen), warum sich
    das Lesen lohnt, ohne Floskeln.
+   Ist "longread_interests" nicht leer, ist das Adrians Interessen-Ranking (erster Eintrag = größtes
+   Interesse). Dann zählt das Ranking mehr als Aktualität: Mindestens zwei der drei Texte kommen aus
+   den oberen Kategorien, der dritte darf zur Abwechslung aus einer weiter unten stammen. Kategorien
+   am Ende der Liste nur, wenn sonst nichts Lesenswertes da ist. "tag" an einem Text ist nur ein grober
+   Hinweis auf die Quelle, ordne jeden Text selbst nach seinem Inhalt ein. Sport-Texte dürfen keine
+   MLB- oder NBA-Ergebnisse von gestern oder heute verraten (Fußball darf).
 
 Format:
 {"spoilers": ["id", ...], "welt": ["id", ...], "brandenburg": ["id", ...],
@@ -46,8 +54,13 @@ Kandidaten:
 
 
 def _slim(items: list[dict], n: int, summary_len: int = 280) -> list[dict]:
-    return [{"id": it["id"], "source": it["source"], "title": it["title"],
-             "summary": it["summary"][:summary_len]} for it in items[:n]]
+    out = []
+    for it in items[:n]:
+        d = {"id": it["id"], "source": it["source"], "title": it["title"], "summary": it["summary"][:summary_len]}
+        if it["section"] == "longreads" and it.get("tag"):
+            d["tag"] = it["tag"]
+        out.append(d)
+    return out
 
 
 def available() -> bool:
@@ -80,8 +93,9 @@ def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | N
         "spoiler_check": _slim(spoiler_items, 80, 400),
         "welt": _slim(welt, 40),
         "brandenburg": _slim(brandenburg, 30),
-        "longreads": _slim(longreads, 40, 400),
+        "longreads": _slim(longreads, 60, 400),
         "already_shown": sorted(already_shown),
+        "longread_interests": config.LONGREAD_INTERESTS,
     }
     prompt = PROMPT + json.dumps(payload, ensure_ascii=False)
     model = os.environ.get("BRIEFING_MODEL", "sonnet")

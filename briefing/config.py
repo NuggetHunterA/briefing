@@ -15,7 +15,7 @@ EDITIONS = {6: "Morgenausgabe", 13: "Mittagsausgabe", 19: "Abendausgabe"}
 FIRST_ISSUE_DATE = "2026-11-06"
 
 # Wie viele Meldungen pro Rubrik höchstens gezeigt werden (hält das Layout planbar)
-LIMITS = {"mlb": 7, "nba": 6, "fussball": 6, "brandenburg": 7, "welt": 8, "longreads": 3}
+LIMITS = {"mlb": 7, "nba": 6, "fussball": 8, "brandenburg": 7, "welt": 8, "longreads": 3}
 
 # Wie alt eine Meldung höchstens sein darf (Stunden)
 MAX_AGE_HOURS = {"mlb": 72, "nba": 48, "fussball": 48, "brandenburg": 48, "welt": 24, "longreads": 24 * 10}
@@ -40,8 +40,9 @@ FEEDS = {
     ],
     "fussball": [
         {"name": "kicker", "url": "https://newsfeed.kicker.de/team/hertha-bsc", "tag": "Hertha"},
-        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga"},
-        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga", "league": "Bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga", "league": "2. Bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/champions-league", "league": "Champions League"},
         {"name": "rbb24 Sport", "url": "https://www.rbb24.de/sport/index.xml/feed=rss.xml"},
     ],
     "brandenburg": [
@@ -52,11 +53,20 @@ FEEDS = {
         {"name": "BBC", "url": "https://feeds.bbci.co.uk/news/world/rss.xml"},
         {"name": "Deutschlandfunk", "url": "https://www.deutschlandfunk.de/nachrichten-100.rss"},
     ],
+    # "tag": grobe Einordnung als Hinweis für Claude; "sport" wird zusätzlich auf MLB/NBA-Spoiler geprüft
     "longreads": [
+        {"name": "FanGraphs", "url": "https://www.fangraphs.com/blogs/feed/", "tag": "sport"},
+        {"name": "Spielverlagerung", "url": "https://spielverlagerung.de/feed/", "tag": "sport"},
+        {"name": "The Guardian US Sport", "url": "https://www.theguardian.com/sport/us-sport/rss", "tag": "sport"},
+        {"name": "JSTOR Daily", "url": "https://daily.jstor.org/feed/", "tag": "geschichte"},
+        {"name": "Smithsonian", "url": "https://www.smithsonianmag.com/rss/history/", "tag": "geschichte"},
         {"name": "The Guardian Long Read", "url": "https://www.theguardian.com/news/series/the-long-read/rss"},
-        {"name": "ProPublica", "url": "https://www.propublica.org/feeds/propublica/main"},
+        {"name": "ProPublica", "url": "https://www.propublica.org/feeds/propublica/main", "tag": "investigativ"},
+        {"name": "CORRECTIV", "url": "https://correctiv.org/feed/", "tag": "investigativ"},
+        {"name": "Rest of World", "url": "https://restofworld.org/feed/latest", "tag": "technik"},
+        {"name": "Atlas Obscura", "url": "https://www.atlasobscura.com/feeds/latest", "tag": "reisen"},
         {"name": "Aeon", "url": "https://aeon.co/feed.rss"},
-        {"name": "Quanta Magazine", "url": "https://www.quantamagazine.org/feed/"},
+        {"name": "Quanta Magazine", "url": "https://www.quantamagazine.org/feed/", "tag": "wissenschaft"},
     ],
 }
 
@@ -79,5 +89,34 @@ HERTHA_WORDS = ["hertha", "herthaner", "olympiastadion"]
 
 OPENLIGADB = "https://api.openligadb.de"
 HERTHA_TEAM_NAMES = ["hertha bsc", "hertha"]
+# Ligen mit Ergebnissen (OpenLigaDB-Kürzel). Die Champions League wird pro Saison automatisch gesucht.
+FOOTBALL_LEAGUES = [
+    {"shortcut": "bl1", "label": "Bundesliga", "short": "1. BL"},
+    {"shortcut": "bl2", "label": "2. Bundesliga", "short": "2. BL"},
+]
+# Höchstens so viele Hertha-Meldungen oben in der Fußball-Rubrik, danach wechseln sich die Ligen ab
+HERTHA_MAX_NEWS = 3
+
+# Spielberichte (mit Ergebnissen) liegen auf der eigenen Recap-Seite, verlinkt in MLB und NBA
+SPORT_RECAP_URL = "https://nuggethuntera.github.io/sport-recap/"
+
+# Longreads: Adrians Interessen, wichtigstes zuerst. Claude nutzt die Reihenfolge bei der Auswahl.
+# Leer = neutrale Auswahl (gut geschrieben, substanziell, aktuell).
+LONGREAD_INTERESTS: list[str] = [
+    "Sport-Hintergründe (Baseball, Basketball, Fußball)",
+    "Geschichte",
+    "Internationale Politik & Konflikte",
+    "Menschen & Reportagen aus dem Alltag",
+    "Investigative Recherchen",
+    "Deutschland & Europa",
+    "Technik & KI",
+    "Reisen & besondere Orte",
+    "Kultur, Medien, Film & Musik",
+    "Wirtschaft & Unternehmen",
+    "Psychologie & Gesundheit",
+    "Klima, Umwelt & Natur",
+    "Wissenschaft & Forschung (Physik, Biologie, Mathematik)",
+    "Philosophie & Ideen",
+]
 
 USER_AGENT = "Mozilla/5.0 (compatible; PersonalBriefing/1.0; private use)"
