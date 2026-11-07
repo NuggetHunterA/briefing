@@ -1,6 +1,7 @@
 # Die Depesche
 
-Persönliche Zeitung für Adrian: MLB & NBA (spoilerfrei), Fußball mit Hertha BSC, Wetter für
+Persönliche Zeitung für Adrian: MLB & NBA (spoilerfrei, mit Link zum Sport Recap), Fußball (Hertha BSC,
+1. und 2. Bundesliga, Champions League, mit Ergebnissen), Wetter für
 Brandenburg an der Havel, Nachrichten aus Brandenburg und der Welt, dazu täglich drei Longreads.
 Nur frei zugängliche Quellen, alle Artikel verlinken auf das Original.
 
@@ -10,11 +11,11 @@ Ein GitHub-Actions-Job baut um **6, 13 und 19 Uhr** (Berliner Zeit) eine fertige
 und veröffentlicht sie auf GitHub Pages:
 
 1. `briefing/sources.py` holt RSS-Feeds, die Tagesschau-API, MLB-Transaktionen (MLB Stats API),
-   Hertha-Tabelle und Spiele (OpenLigaDB) und das Wetter (Open-Meteo, DWD-Warnungen über Bright Sky).
-2. `briefing/curate.py` filtert, sortiert (Padres und Athletics zuerst, Hertha zuerst, Brandenburg an
+   Tabellen und Ergebnisse für Bundesliga, 2. Bundesliga und Champions League (OpenLigaDB) und das Wetter (Open-Meteo, DWD-Warnungen über Bright Sky).
+2. `briefing/curate.py` filtert, sortiert (Padres und Athletics zuerst, höchstens drei Hertha-Meldungen oben, danach die Ligen im Wechsel, Brandenburg an
    der Havel zuerst) und entfernt Dubletten.
 3. `briefing/llm.py` lässt Claude Spoiler prüfen, den Welt-Aufmacher wählen und drei Longreads
-   aussuchen. Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
+   aussuchen (nach Adrians Interessen-Ranking in `LONGREAD_INTERESTS`, sobald es gesetzt ist). Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
 4. `briefing/render.py` + `templates/index.html.j2` + `static/` erzeugen die Seite.
 
 **Spoiler-Schutz:** Nur MLB und NBA, nur Ergebnisse vom Vortag und von heute. Feste Muster

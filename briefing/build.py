@@ -50,7 +50,7 @@ def collect(now_utc: datetime) -> dict:
     return {
         "news": sources.fetch_all_news(),
         "transactions": sources.fetch_mlb_transactions(now_utc),
-        "hertha": sources.fetch_hertha(now_utc),
+        "football": sources.fetch_football(now_utc),
         "weather": sources.fetch_weather(),
     }
 
@@ -61,10 +61,18 @@ def revive(raw: dict) -> dict:
         for it in items:
             if isinstance(it.get("published"), str):
                 it["published"] = datetime.fromisoformat(it["published"])
-    h = raw.get("hertha") or {}
-    for k in ("last", "next"):
-        if h.get(k) and isinstance(h[k].get("when"), str):
-            h[k]["when"] = datetime.fromisoformat(h[k]["when"])
+    fb = raw.get("football") or {"hertha": raw.get("hertha"), "leagues": []}  # ältere Fixtures
+    raw["football"] = fb
+    matches = [(fb.get("hertha") or {}).get(k) for k in ("last", "next")]
+    for lg in fb.get("leagues") or []:
+        for k in ("last", "next"):
+            rnd = lg.get(k) or {}
+            matches += rnd.get("matches", [])
+            if isinstance(rnd.get("start"), str):
+                rnd["start"] = datetime.fromisoformat(rnd["start"])
+    for m in matches:
+        if m and isinstance(m.get("when"), str):
+            m["when"] = datetime.fromisoformat(m["when"])
     return raw
 
 
@@ -139,7 +147,8 @@ def main() -> None:
         "longread_history": history,
         "hidden": hidden,
         "transactions": raw["transactions"],
-        "hertha": raw["hertha"],
+        "hertha": raw["football"].get("hertha"),
+        "leagues": raw["football"].get("leagues", []),
         "weather": raw["weather"],
     }
 

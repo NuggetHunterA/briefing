@@ -15,7 +15,7 @@ EDITIONS = {6: "Morgenausgabe", 13: "Mittagsausgabe", 19: "Abendausgabe"}
 FIRST_ISSUE_DATE = "2026-11-06"
 
 # Wie viele Meldungen pro Rubrik höchstens gezeigt werden (hält das Layout planbar)
-LIMITS = {"mlb": 7, "nba": 6, "fussball": 6, "brandenburg": 7, "welt": 8, "longreads": 3}
+LIMITS = {"mlb": 7, "nba": 6, "fussball": 8, "brandenburg": 7, "welt": 8, "longreads": 3}
 
 # Wie alt eine Meldung höchstens sein darf (Stunden)
 MAX_AGE_HOURS = {"mlb": 72, "nba": 48, "fussball": 48, "brandenburg": 48, "welt": 24, "longreads": 24 * 10}
@@ -40,8 +40,9 @@ FEEDS = {
     ],
     "fussball": [
         {"name": "kicker", "url": "https://newsfeed.kicker.de/team/hertha-bsc", "tag": "Hertha"},
-        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga"},
-        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/bundesliga", "league": "Bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/2-bundesliga", "league": "2. Bundesliga"},
+        {"name": "kicker", "url": "https://newsfeed.kicker.de/news/champions-league", "league": "Champions League"},
         {"name": "rbb24 Sport", "url": "https://www.rbb24.de/sport/index.xml/feed=rss.xml"},
     ],
     "brandenburg": [
@@ -79,5 +80,19 @@ HERTHA_WORDS = ["hertha", "herthaner", "olympiastadion"]
 
 OPENLIGADB = "https://api.openligadb.de"
 HERTHA_TEAM_NAMES = ["hertha bsc", "hertha"]
+# Ligen mit Ergebnissen (OpenLigaDB-Kürzel). Die Champions League wird pro Saison automatisch gesucht.
+FOOTBALL_LEAGUES = [
+    {"shortcut": "bl1", "label": "Bundesliga", "short": "1. BL"},
+    {"shortcut": "bl2", "label": "2. Bundesliga", "short": "2. BL"},
+]
+# Höchstens so viele Hertha-Meldungen oben in der Fußball-Rubrik, danach wechseln sich die Ligen ab
+HERTHA_MAX_NEWS = 3
+
+# Spielberichte (mit Ergebnissen) liegen auf der eigenen Recap-Seite, verlinkt in MLB und NBA
+SPORT_RECAP_URL = "https://nuggethuntera.github.io/sport-recap/"
+
+# Longreads: Adrians Interessen, wichtigstes zuerst. Claude nutzt die Reihenfolge bei der Auswahl.
+# Leer = neutrale Auswahl (gut geschrieben, substanziell, aktuell).
+LONGREAD_INTERESTS: list[str] = []
 
 USER_AGENT = "Mozilla/5.0 (compatible; PersonalBriefing/1.0; private use)"
