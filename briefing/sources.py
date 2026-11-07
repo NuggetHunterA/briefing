@@ -294,19 +294,22 @@ def _recent_view(label: str, matches: list, start: datetime, end: datetime, germ
     return {"label": label, "matchday": shown[0]["matchday"], "matches": shown, "more": total - len(shown)}
 
 
-def _find_cl(season: int) -> str | None:
-    """Kürzel der Champions League bei OpenLigaDB suchen (wechselt je Saison)."""
+def _find_cl(season: int) -> list[str]:
+    """Kürzel der Champions League bei OpenLigaDB suchen (wechseln je Saison). Alle Treffer zählen,
+    falls Ligaphase und K.-o.-Runde dort einmal getrennt geführt werden."""
     r = get(f"{config.OPENLIGADB}/getavailableleagues")
     if r is None:
-        return None
+        return []
+    found = []
     for lg in r.json() or []:
         name = (lg.get("leagueName") or "").lower()
         if (str(lg.get("leagueSeason")) == str(season) and "champions league" in name
-                and not any(w in name for w in ("frauen", "women", "youth", "uefa youth"))):
+                and not any(w in name for w in ("frauen", "women", "youth"))):
             log.info("fussball     OpenLigaDB CL-Kürzel: %s (%s)", lg.get("leagueShortcut"), lg.get("leagueName"))
-            return lg.get("leagueShortcut")
-    log.info("fussball     OpenLigaDB: keine Champions League für Saison %s gefunden", season)
-    return None
+            found.append(lg.get("leagueShortcut"))
+    if not found:
+        log.info("fussball     OpenLigaDB: keine Champions League für Saison %s gefunden", season)
+    return found
 
 
 def fetch_football(now: datetime) -> dict:
@@ -316,11 +319,14 @@ def fetch_football(now: datetime) -> dict:
     today = local.replace(hour=0, minute=0, second=0, microsecond=0)
     start, end = today - timedelta(days=1), today + timedelta(days=1)
     leagues = [(lg["shortcut"], lg["label"], lg["short"]) for lg in config.FOOTBALL_LEAGUES]
-    cl = _find_cl(season)
-    if cl:
-        leagues.append((cl, "Champions League", "CL"))
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    cl_codes = _find_cl(season)
+    with ThreadPoolExecutor(max_workers=4) as pool:
         data = list(pool.map(lambda lg: _league_data(lg[0], season), leagues))
+        cl_data = list(pool.map(lambda sc: _league_data(sc, season), cl_codes))
+    cl = "ucl"
+    if cl_codes:  # Ligaphase und K.-o.-Runde zusammenführen
+        leagues.append((cl, "Champions League", "CL"))
+        data.append(([], [x for _, ms in cl_data for x in ms]))
     hertha, rounds = None, []
     german = {row.get("teamName") for sc, (table, _) in zip(leagues, data) if sc[0] in ("bl1", "bl2") for row in table}
     for (shortcut, label, short), (table, matches) in zip(leagues, data):
@@ -337,9 +343,15 @@ def fetch_football(now: datetime) -> dict:
 
 def _match(x: dict) -> dict:
     res = None
-    for r in x.get("matchResults") or []:
-        if r.get("resultTypeID") == 2 or r.get("resultName") == "Endergebnis":
-            res = f'{r["pointsTeam1"]}:{r["pointsTeam2"]}'
+    results = x.get("matchResults") or []
+    final = [r for r in results if r.get("resultTypeID") == 2 or r.get("resultName") == "Endergebnis"]
+    extra = [r for r in results if re.search(r"verlängerung|elfmeter", r.get("resultName") or "", re.I)]
+    if final:
+        res = f'{final[-1]["pointsTeam1"]}:{final[-1]["pointsTeam2"]}'
+    if extra and x.get("matchIsFinished"):  # K.-o.-Spiele: Ergebnis nach Verlängerung/Elfmeterschießen
+        r = max(extra, key=lambda r: r.get("resultOrderID") or 0)
+        tag = "n. E." if "elfmeter" in (r.get("resultName") or "").lower() else "n. V."
+        res = f'{r["pointsTeam1"]}:{r["pointsTeam2"]} {tag}'
     when = x.get("matchDateTimeUTC")
     return {
         "home": x["team1"].get("shortName") or x["team1"]["teamName"],
