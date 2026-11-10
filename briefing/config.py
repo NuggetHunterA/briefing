@@ -66,14 +66,12 @@ WISSEN_FEEDS = [
     {"name": "NDR Gesundheit", "url": "https://www.ndr.de/ratgeber/gesundheit/index-rss.xml"},
 ]
 VERBRAUCHER_FEEDS = [
-    {"name": "Verbraucherzentrale", "url": "https://www.verbraucherzentrale.de/wissen/feed"},
     {"name": "Stiftung Warentest", "url": "https://www.test.de/rss/alles/"},
     {"name": "NDR Ratgeber", "url": "https://www.ndr.de/ratgeber/verbraucher/index-rss.xml"},
 ]
 JURA_FEEDS = [
     {"name": "LTO", "url": "https://www.lto.de/rss/feed.xml"},
     {"name": "BGH", "url": "https://www.bundesgerichtshof.de/DE/Service/RSSFeed/Function/RSS_PM.xml"},
-    {"name": "BVerfG", "url": "https://www.bundesverfassungsgericht.de/SiteGlobals/Functions/RSSFeed/RSSNewsfeed/RSSNewsfeed.xml"},
     {"name": "Verfassungsblog", "url": "https://verfassungsblog.de/feed/"},
 ]
 # Wirtschaftslastige Verbraucher-Meldungen rutschen nach hinten (Ulrike: weniger Finanzen)
