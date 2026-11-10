@@ -79,7 +79,7 @@ jobs:
           name: ausgabe
           path: |
             site
-            raw.json
+            raw*.json
           retention-days: 7
 
       - name: Für GitHub Pages bereitstellen
