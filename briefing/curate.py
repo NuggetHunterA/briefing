@@ -85,6 +85,11 @@ def favorite_of(it: dict) -> str | None:
     return None
 
 
+def is_finance(it: dict) -> bool:
+    txt = _text(it).lower()
+    return any(re.search(rf"\b{re.escape(w)}", txt) for w in config.FINANCE_WORDS)
+
+
 def dedupe(items: list[dict]) -> list[dict]:
     seen_url, seen_title, out = set(), set(), []
     for it in items:
@@ -148,8 +153,11 @@ def prepare(raw: dict[str, list[dict]], now_utc: datetime) -> dict[str, list[dic
                     it["league"] = league_of(txt)
                 keep.append(it)
             items = football_mix(newest_first(keep))
-        elif section == "welt":
+        elif section in ("welt", "gute", "wissen", "jura"):
             items = round_robin(items)
+        elif section == "verbraucher":
+            items = round_robin(items)
+            items.sort(key=is_finance)  # Geld-Themen nach hinten, Reihenfolge sonst unverändert
         elif section == "longreads":
             # keine Podcasts, Videos oder Audio-Beiträge
             items = [it for it in items if not re.search(r"podcast|/videos?/|/audio/", it["title"] + " " + it["url"], re.I)]
@@ -200,7 +208,7 @@ def order_by(items: list[dict], ids: list[str]) -> list[dict]:
 
 
 def fallback_longreads(items: list[dict], exclude: set[str]) -> list[dict]:
-    """Ohne Claude: Quellen in der Reihenfolge aus config.FEEDS (nach Adrians Interessen sortiert)."""
+    """Ohne Claude: Quellen in der Reihenfolge aus config.FEEDS (nach den Interessen des Profils sortiert)."""
     rank = {f["name"]: i for i, f in enumerate(config.FEEDS["longreads"])}
     picks, used_sources = [], set()
     for it in sorted(newest_first(items), key=lambda x: rank.get(x["source"], 99)):

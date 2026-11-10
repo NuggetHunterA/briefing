@@ -30,7 +30,7 @@
 
 <header class="masthead">
   <div class="mast-top">
-    <span>Persönliche Ausgabe</span>
+    <span>Ausgabe für {{ reader }}</span>
     <span class="mast-top-mid">Brandenburg an der Havel</span>
     <span>Nr. {{ issue_no }}</span>
   </div>
@@ -58,15 +58,15 @@
     <span class="dot">◆</span>
     <span>{{ e.edition }}</span>
     <span class="dot">◆</span>
-    <span>Spoilerfrei für MLB &amp; NBA</span>
+    <span>{{ dateline_note }}</span>
   </div>
 </header>
 
 <nav class="index" aria-label="Rubriken">
   <a href="#welt">Welt</a>
-  <a href="#mlb">MLB</a>
-  <a href="#nba">NBA</a>
-  <a href="#fussball">Fußball</a>
+  {% for c, info in columns %}
+  <a href="#{{ c }}">{{ info.nav or info.title }}</a>
+  {% endfor %}
   <a href="#lesestoff">Lesestoff</a>
   <a href="#brandenburg">Brandenburg</a>
   <a href="#wetter">Wetter</a>
@@ -157,10 +157,28 @@
     {% else %}
     <p class="empty">Wetterdaten gerade nicht verfügbar.</p>
     {% endif %}
+    {% if alltag %}
+    <div class="alltag" id="alltag">
+      <h4>Alltag</h4>
+      <dl>
+        <div><dt>Pollen {{ alltag.pollen.day }}</dt><dd>
+          {% if alltag.pollen.top %}{% for p in alltag.pollen.top %}{{ p.name }} <span class="lvl lvl-{{ p.rank }}">{{ p.text }}</span>{{ ', ' if not loop.last }}{% endfor %}
+          {% elif alltag.pollen.known %}kein Pollenflug{% else %}keine Daten{% endif %}</dd></div>
+        {% if alltag.uv and alltag.uv.value is not none %}<div><dt>UV-Index</dt><dd>{{ alltag.uv.value|num }} · {{ alltag.uv.label }}</dd></div>{% endif %}
+        {% if alltag.sun %}<div><dt>Tageslicht</dt><dd>{{ alltag.sun.length }}{% if alltag.sun.delta %} · morgen {{ '%+d'|format(alltag.sun.delta) }} Min.{% endif %}</dd></div>{% endif %}
+        <div><dt>Mond</dt><dd>{{ alltag.moon }}</dd></div>
+        <div><dt>Feiertag</dt><dd>{% if alltag.holiday.days == 0 %}Heute: {{ alltag.holiday.name }}{% else %}{{ alltag.holiday.name }}, {{ WD_SHORT[alltag.holiday.date.weekday()] }} {{ alltag.holiday.date.day }}.{{ alltag.holiday.date.month }}. <span class="muted">in {{ alltag.holiday.days }} {{ 'Tag' if alltag.holiday.days == 1 else 'Tagen' }}</span>{% endif %}</dd></div>
+        {% if alltag.school %}<div><dt>Schulferien</dt><dd>{% if alltag.school.now %}{{ alltag.school.name }} bis {{ alltag.school.end.day }}.{{ alltag.school.end.month }}.{% else %}{{ alltag.school.name }} ab {{ alltag.school.start.day }}.{{ alltag.school.start.month }}. <span class="muted">in {{ alltag.school.days }} Tagen</span>{% endif %}</dd></div>{% endif %}
+      </dl>
+    </div>
+    {% endif %}
   </aside>
 
-  {# ─────────────── MLB ─────────────── #}
-  <section class="sec sec-mlb" id="mlb">
+  {# ─────────────── Spalten-Rubriken (je nach Profil) ─────────────── #}
+  <div class="desk desk-{{ columns|length }}">
+  {% for c, info in columns %}
+  {% if c == 'mlb' %}
+  <section class="sec sec-col sec-mlb" id="mlb">
     <h2 class="sec-head"><span>MLB</span><small>Trades · Gerüchte · Verträge</small></h2>
     {% if e.hidden.mlb %}<p class="stamp">Spoilerfrei · {{ e.hidden.mlb }} Meldung{{ 'en' if e.hidden.mlb != 1 }} mit Ergebnissen ausgeblendet</p>{% endif %}
     <ol class="list">
@@ -187,9 +205,8 @@
     </div>
     {% endif %}
   </section>
-
-  {# ─────────────── NBA ─────────────── #}
-  <section class="sec sec-nba" id="nba">
+  {% elif c == 'nba' %}
+  <section class="sec sec-col sec-nba" id="nba">
     <h2 class="sec-head"><span>NBA</span><small>Trades · Gerüchte · Verträge</small></h2>
     {% if e.hidden.nba %}<p class="stamp">Spoilerfrei · {{ e.hidden.nba }} Meldung{{ 'en' if e.hidden.nba != 1 }} mit Ergebnissen ausgeblendet</p>{% endif %}
     <ol class="list">
@@ -205,9 +222,8 @@
     </ol>
     <p class="recap"><a href="{{ recap_url }}" target="_blank" rel="noopener">Spielberichte mit Ergebnissen im Sport Recap&nbsp;→</a></p>
   </section>
-
-  {# ─────────────── Fußball ─────────────── #}
-  <section class="sec sec-fussball" id="fussball">
+  {% elif c == 'fussball' %}
+  <section class="sec sec-col sec-fussball" id="fussball">
     <h2 class="sec-head"><span>Fußball</span><small>Hertha BSC · Bundesliga · Champions League · 2. Liga</small></h2>
     {% set h = e.hertha %}
     {% if h %}
@@ -259,6 +275,25 @@
       {% endfor %}
     </ol>
   </section>
+  {% else %}
+  <section class="sec sec-col sec-{{ c }}" id="{{ c }}">
+    <h2 class="sec-head"><span>{{ info.title }}</span><small>{{ info.sub }}</small></h2>
+    <ol class="list">
+      {% for it in s[c] %}
+      <li class="item">
+        {% if it.tag and it.source == 'tagesschau' %}<p class="kicker">{{ it.tag }}</p>{% endif %}
+        <h3><a href="{{ it.url }}" target="_blank" rel="noopener">{{ it.title }}</a></h3>
+        {% if loop.index <= 2 and it.summary %}<p class="summary">{{ it.summary }}</p>{% endif %}
+        <p class="meta">{{ it.source }} · {{ it.published|ago }}</p>
+      </li>
+      {% else %}
+      <li class="empty">{{ info.empty or 'Heute keine Meldungen.' }}</li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+  {% endfor %}
+  </div>
 
   {# ─────────────── Lesestoff ─────────────── #}
   <section class="sec sec-longreads" id="lesestoff">
@@ -318,9 +353,7 @@
   <p><strong>Die Depesche</strong> · {{ e.edition }} vom {{ long_date(now) }}, {{ now|hhmm }} Uhr ·
     Redaktion: {{ 'Claude' if e.editor == 'claude' else 'automatische Regeln' }}</p>
   <p>Nächste Ausgaben um 6, 13 und 19 Uhr. Alle Artikel verlinken auf die Originalquellen.
-    Quellen: MLB Trade Rumors, MLB Stats API, Hoops Rumors, kicker, OpenLigaDB, rbb24, tagesschau,
-    Deutschlandfunk, BBC, The Guardian, FanGraphs, Spielverlagerung, JSTOR Daily, Smithsonian, ProPublica,
-    CORRECTIV, Rest of World, Atlas Obscura, Aeon, Quanta Magazine, Open-Meteo (DWD), Bright Sky.</p>
+    Quellen: {{ sources|join(", ") }}.</p>
 </footer>
 
 <script>window.BRIEFING = {lat: {{ e.location.lat }}, lon: {{ e.location.lon }}};</script>

@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from . import config
+from . import alltag, config
 
 TZ = ZoneInfo(config.TIMEZONE)
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
@@ -125,10 +125,10 @@ def weather_view(w: dict | None, now: datetime) -> dict | None:
 
 MORNING_LINES = [
     "Erst mal Kaffee.", "Der Tag beginnt mit einer Tasse.", "Kaffee ist fertig, die Zeitung auch.",
-    "Guten Morgen, Adrian.", "Noch fünf Minuten, dann geht's los.",
+    "Guten Morgen, {reader}.", "Noch fünf Minuten, dann geht's los.",
 ]
 EVENING_LINES = [
-    "Feierabend.", "Der Tag ist gelesen.", "Licht aus an der Havel.", "Guten Abend, Adrian.",
+    "Feierabend.", "Der Tag ist gelesen.", "Licht aus an der Havel.", "Guten Abend, {reader}.",
 ]
 
 
@@ -172,13 +172,13 @@ def mood_view(weather: dict | None, now: datetime) -> dict:
     t = f"{round(temp)}°" if temp is not None else ""
     seed = now.toordinal()
     if scene == "morning":
-        caption = f"{MORNING_LINES[seed % len(MORNING_LINES)]} Draußen: {cond} bei {t}." if t else MORNING_LINES[0]
+        caption = f"{MORNING_LINES[seed % len(MORNING_LINES)].format(reader=config.READER)} Draußen: {cond} bei {t}." if t else MORNING_LINES[0]
     elif scene == "noon":
         caption = f"Mittag an der Havel: {cond}, {t}."
         if day and (day[0].get("pp") or 0) >= 40:
             caption += f" Regenrisiko {day[0]['pp']} %."
     else:
-        caption = f"{EVENING_LINES[seed % len(EVENING_LINES)]} {cond} bei {t}."
+        caption = f"{EVENING_LINES[seed % len(EVENING_LINES)].format(reader=config.READER)} {cond} bei {t}."
         if day and day[0].get("sunset"):
             caption += f" Die Sonne ist um {as_dt(day[0]['sunset']).strftime('%H:%M')} untergegangen." if as_dt(day[0]["sunset"]) <= now else ""
     clear = kind in ("sun", "sun-cloud")
@@ -195,15 +195,40 @@ def issue_number(now: datetime) -> int:
     return max(1, days * len(config.EDITIONS) + slot)
 
 
+# Quellen im Fuß, die nicht als Feed in config.FEEDS stehen
+EXTRA_SOURCES = {
+    "mlb": ["MLB Stats API"], "fussball": ["OpenLigaDB"], "welt": ["tagesschau"], "brandenburg": ["tagesschau"],
+    "wissen": ["tagesschau"],
+}
+
+
+def source_names() -> list[str]:
+    """Alle Quellen der aktiven Seite, ohne Doppelungen, in Seitenreihenfolge."""
+    order = ["welt", *config.COLUMNS, "longreads", "brandenburg"]
+    names: list[str] = []
+    for section in order:
+        for n in [f["name"] for f in config.FEEDS.get(section, [])] + EXTRA_SOURCES.get(section, []):
+            if n not in names:
+                names.append(n)
+    names += ["Open-Meteo (DWD)", "Bright Sky"]
+    if config.ALLTAG:
+        names += ["DWD Pollenflug", "OpenHolidays"]
+    return names
+
+
 def render(edition: dict, now: datetime) -> str:
     env = make_env(now)
     tpl = env.get_template("index.html.j2")
     welt = edition["sections"]["welt"]
     lead = next((it for it in welt[:3] if it.get("image")), welt[0] if welt else None)
     welt_rest = [it for it in welt if it is not lead]
+    weather = weather_view(edition["weather"], now)
     return tpl.render(
         e=edition, s=edition["sections"], now=now, lead=lead, welt_rest=welt_rest,
-        weather=weather_view(edition["weather"], now), favorites=config.MLB_FAVORITES,
-        mood=mood_view(weather_view(edition["weather"], now), now),
+        weather=weather, favorites=config.MLB_FAVORITES,
+        mood=mood_view(weather, now),
+        columns=[(c, config.SECTION_INFO[c]) for c in config.COLUMNS],
+        alltag=alltag.view(edition.get("alltag"), weather, now) if config.ALLTAG else None,
+        reader=config.READER, dateline_note=config.DATELINE_NOTE, sources=source_names(),
         issue_no=issue_number(now), utc_now=datetime.now(timezone.utc), recap_url=config.SPORT_RECAP_URL,
     )

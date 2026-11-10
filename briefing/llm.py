@@ -19,13 +19,13 @@ from . import config
 
 log = logging.getLogger("briefing")
 
-PROMPT = """Du bist der Redakteur einer persönlichen Morgenzeitung für Adrian aus Brandenburg an der Havel.
+PROMPT = """Du bist der Redakteur einer persönlichen Morgenzeitung für {reader} aus Brandenburg an der Havel.
 Du bekommst unten JSON mit Kandidaten. Antworte NUR mit einem JSON-Objekt, ohne Erklärung, ohne Markdown.
 
 Aufgaben:
 1. "spoilers": Prüfe jede Meldung in "spoiler_check" (MLB/NBA, alle vom Vortag oder heute).
-   Adrian schaut die Spiele zeitversetzt. Markiere jede Meldung, die verrät, wie ein Spiel
-   von gestern oder heute ausgegangen ist oder verlaufen ist: Ergebnisse, Sieger, Serien,
+   Ist "spoiler_check" leer, gib eine leere Liste zurück. {reader} schaut die Spiele zeitversetzt.
+   Markiere jede Meldung, die verrät, wie ein Spiel von gestern oder heute ausgegangen ist oder verlaufen ist: Ergebnisse, Sieger, Serien,
    Siegesserien, Statistiken aus dem Spiel, Tabellen- oder Playoff-Folgen daraus, auch indirekt
    ("nach der Niederlage", "feiert", "Comeback"). Trades, Gerüchte, Verträge, Verletzungen ohne
    Spielergebnis sind OK. Im Zweifel markieren. Gib die ids als Liste zurück.
@@ -38,7 +38,7 @@ Aufgaben:
    aktuelle Zeitgeschehen relevant sind. Unterschiedliche Themen und möglichst unterschiedliche Quellen.
    Nichts aus "already_shown". Zu jedem ein Satz "why" auf Deutsch (max. 160 Zeichen), warum sich
    das Lesen lohnt, ohne Floskeln.
-   Ist "longread_interests" nicht leer, ist das Adrians Interessen-Ranking (erster Eintrag = größtes
+   Ist "longread_interests" nicht leer, ist das das Interessen-Ranking von {reader} (erster Eintrag = größtes
    Interesse). Dann zählt das Ranking mehr als Aktualität: Mindestens zwei der drei Texte kommen aus
    den oberen Kategorien, der dritte darf zur Abwechslung aus einer weiter unten stammen. Kategorien
    am Ende der Liste nur, wenn sonst nichts Lesenswertes da ist. "tag" an einem Text ist nur ein grober
@@ -97,7 +97,7 @@ def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | N
         "already_shown": sorted(already_shown),
         "longread_interests": config.LONGREAD_INTERESTS,
     }
-    prompt = PROMPT + json.dumps(payload, ensure_ascii=False)
+    prompt = PROMPT.replace("{reader}", config.READER) + json.dumps(payload, ensure_ascii=False)
     model = os.environ.get("BRIEFING_MODEL", "sonnet")
     try:
         res = subprocess.run(

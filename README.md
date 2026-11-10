@@ -1,8 +1,12 @@
 # Die Depesche
 
-Persönliche Zeitung für Adrian: MLB & NBA (spoilerfrei, mit Link zum Sport Recap), Fußball (Hertha BSC,
-1. und 2. Bundesliga, Champions League, mit Ergebnissen), Wetter für
-Brandenburg an der Havel, Nachrichten aus Brandenburg und der Welt, dazu täglich drei Longreads.
+Persönliche Zeitung in zwei Ausgaben, beide mit Wetter für Brandenburg an der Havel, Nachrichten aus
+Brandenburg und der Welt und täglich drei Longreads:
+
+- **Adrian** (Startseite): MLB & NBA (spoilerfrei, mit Link zum Sport Recap) und Gute Nachrichten.
+- **Ulrike** (`/ulrike/`): Wissen & Gesundheit, Verbraucher, Recht, Gute Nachrichten und ein
+  Alltagskasten (Pollenflug, UV-Index, Tageslicht, Mond, nächster Feiertag, Schulferien).
+
 Nur frei zugängliche Quellen, alle Artikel verlinken auf das Original.
 
 ## So funktioniert es
@@ -10,12 +14,13 @@ Nur frei zugängliche Quellen, alle Artikel verlinken auf das Original.
 Ein GitHub-Actions-Job baut um **6, 13 und 19 Uhr** (Berliner Zeit) eine fertige, statische Seite
 und veröffentlicht sie auf GitHub Pages:
 
-1. `briefing/sources.py` holt RSS-Feeds, die Tagesschau-API, MLB-Transaktionen (MLB Stats API),
-   Tabellen und Ergebnisse für Bundesliga, 2. Bundesliga und Champions League (OpenLigaDB) und das Wetter (Open-Meteo, DWD-Warnungen über Bright Sky).
-2. `briefing/curate.py` filtert, sortiert (Padres und Athletics zuerst, höchstens drei Hertha-Meldungen oben, danach die Ligen im Wechsel, Brandenburg an
-   der Havel zuerst) und entfernt Dubletten.
+1. `briefing/sources.py` holt RSS-Feeds, die Tagesschau-API, MLB-Transaktionen (MLB Stats API)
+   und das Wetter (Open-Meteo, DWD-Warnungen über Bright Sky). `briefing/alltag.py` holt Pollenflug
+   (DWD) und Schulferien (OpenHolidays API) und berechnet Feiertage und Mondphase selbst.
+2. `briefing/curate.py` filtert, sortiert (Padres und Athletics zuerst, Brandenburg an der Havel zuerst,
+   bei Verbraucher-Meldungen Geldthemen nach hinten) und entfernt Dubletten.
 3. `briefing/llm.py` lässt Claude Spoiler prüfen, den Welt-Aufmacher wählen und drei Longreads
-   aussuchen (nach Adrians Interessen-Ranking in `LONGREAD_INTERESTS`, sobald es gesetzt ist). Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
+   aussuchen (nach dem Interessen-Ranking der Person in `LONGREAD_INTERESTS`). Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
 4. `briefing/render.py` + `templates/index.html.j2` + `static/` erzeugen die Seite.
 
 **Spoiler-Schutz:** Nur MLB und NBA (auch Sport-Longreads), nur Ergebnisse vom Vortag und von heute. Feste Muster
@@ -40,12 +45,16 @@ python -m briefing.build --out site       # holt echte Daten
 python -m http.server -d site 8000
 ```
 
-`--dump raw.json` speichert die Rohdaten, `--fixture raw.json` baut daraus erneut (ohne Netz),
+`--dump raw.json` speichert die Rohdaten (Ulrikes in `raw-ulrike.json`), `--fixture raw.json` baut daraus erneut (ohne Netz),
 `--now 2026-11-06T13:05` simuliert eine Uhrzeit.
 
 ## Quellen anpassen
 
 Alles steht in `briefing/config.py`: Feeds, Lieblingsteams, Ort, Anzahl der Meldungen pro Rubrik.
+Die Werte oben gelten für Adrian. Unter `PROFILES` überschreibt jede weitere Person nur, was bei ihr
+anders ist (Rubriken in `COLUMNS`, Feeds, Longread-Interessen, Unterordner `PATH`). Ein Lauf baut
+alle Profile, `--profile ulrike` baut nur eines. Fußball (Hertha, Ligen) ist abgeschaltet, der Code
+bleibt aber da: `"fussball"` in `COLUMNS`, `LIMITS` und `FEEDS` aufnehmen.
 
 ## Hinweis zur Sichtbarkeit
 

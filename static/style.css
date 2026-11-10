@@ -432,26 +432,31 @@ ol, ul { list-style: none; }
     grid-template-areas:
       "lead lead lead lead lead lead"
       "wx   wx   wx   wx   wx   wx"
-      "mlb  mlb  mlb  nba  nba  nba"
-      "fb   fb   fb   bb   bb   bb"
+      "desk desk desk desk desk desk"
       "lr   lr   lr   lr   lr   lr"
+      "bb   bb   bb   bb   bb   bb"
       "wo   wo   wo   wo   wo   wo";
     column-gap: var(--gap);
   }
   .sec-lead { grid-area: lead; }
   .sec-weather { grid-area: wx; }
-  .sec-mlb { grid-area: mlb; }
-  .sec-nba { grid-area: nba; }
-  .sec-fussball { grid-area: fb; }
+  .desk { grid-area: desk; }
   .sec-brandenburg { grid-area: bb; }
   .sec-longreads { grid-area: lr; }
   .sec-world { grid-area: wo; }
 
   /* Spaltenlinien wie in der Zeitung */
-  .sec-nba, .sec-brandenburg { position: relative; }
-  .sec-nba::before, .sec-brandenburg::before {
+  /* Spalten-Rubriken: zwei nebeneinander, eine übrig gebliebene läuft über die volle Breite */
+  .desk { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
+  .desk > .sec-col { position: relative; }
+  .desk > .sec-col:nth-child(2n)::before {
     content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--gap) / -2); border-left: 1px solid var(--hair);
   }
+  .desk > .sec-col:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .desk > .sec-col:last-child:nth-child(odd) .list { columns: 2; column-gap: var(--gap); }
+  .desk > .sec-col:last-child:nth-child(odd) .list > li { break-inside: avoid; }
+  .sec-brandenburg .list { columns: 2; column-gap: var(--gap); }
+  .sec-brandenburg .list > li { break-inside: avoid; }
   .briefs { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
   .wx-wrap { display: contents; }
   .sec-weather { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--gap); align-content: start; }
@@ -485,9 +490,9 @@ ol, ul { list-style: none; }
   .paper {
     grid-template-areas:
       "lead lead lead lead wx   wx"
-      "mlb  mlb  mlb  nba  nba  nba"
-      "fb   fb   fb   bb   bb   bb"
+      "desk desk desk desk desk desk"
       "lr   lr   lr   lr   lr   lr"
+      "bb   bb   bb   bb   bb   bb"
       "wo   wo   wo   wo   wo   wo";
   }
   .sec-weather { display: block; position: relative; }
@@ -509,15 +514,21 @@ ol, ul { list-style: none; }
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-areas:
       "lead lead lead lead lead lead lead lead lead wx  wx  wx"
-      "mlb  mlb  mlb  mlb  nba  nba  nba  nba  fb   fb  fb  fb"
+      "desk desk desk desk desk desk desk desk desk desk desk desk"
       "lr   lr   lr   lr   lr   lr   lr   lr   lr   lr  lr  lr"
       "bb   bb   bb   bb   bb   bb   wo   wo   wo   wo  wo  wo";
   }
-  .sec-fussball, .sec-world { position: relative; }
-  .sec-fussball::before, .sec-world::before {
+  .desk-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .desk-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desk-3 > .sec-col:last-child:nth-child(odd) { grid-column: auto; }
+  .desk-3 > .sec-col:last-child:nth-child(odd) .list { columns: auto; }
+  .desk > .sec-col + .sec-col::before {
     content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--gap) / -2); border-left: 1px solid var(--hair);
   }
-  .sec-brandenburg::before { display: none; }
+  .sec-world { position: relative; }
+  .sec-world::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--gap) / -2); border-left: 1px solid var(--hair);
+  }
   .lead { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
   .lead-title { font-size: clamp(36px, 3.3vw, 54px); }
   .briefs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -526,9 +537,17 @@ ol, ul { list-style: none; }
   .briefs .brief h3 { font-size: 19px; }
   .longread h3 { font-size: 30px; }
   .longread + .longread::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--gap) / -2); border-left: 1px solid color-mix(in srgb, var(--band-ink) 25%, transparent); }
-  .sec-brandenburg .list { columns: 2; column-gap: var(--gap); }
-  .sec-brandenburg .list > li { break-inside: avoid; }
 }
+
+/* Alltagskasten (beim Wetter) */
+.alltag { margin-top: 16px; padding: 14px 16px; background: var(--paper-2); grid-column: 1 / -1; }
+.alltag h4 { font: 800 11px/1 var(--f-label); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px; }
+.alltag dl > div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px dotted var(--hair); font: 500 14px/1.35 var(--f-label); }
+.alltag dl > div:first-child { border-top: 0; padding-top: 0; }
+.alltag dt { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.alltag .muted { color: var(--muted); }
+.alltag .lvl { font-weight: 700; }
+.alltag .lvl-4, .alltag .lvl-5, .alltag .lvl-6 { color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
