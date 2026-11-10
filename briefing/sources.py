@@ -364,8 +364,24 @@ def _match(x: dict) -> dict:
 
 # --- Wetter: Open-Meteo (DWD ICON) + DWD-Warnungen über Bright Sky ---
 
+_WEATHER_CACHE: dict = {}
+
+
 def fetch_weather() -> dict | None:
+    """Einmal pro Lauf und Ort abholen: alle Profile teilen sich die Daten (Open-Meteo antwortet auf
+    schnell wiederholte Anfragen oft nicht). Bei Zeitüberschreitung ein zweiter Versuch."""
     loc = config.LOCATION
+    key = (loc["lat"], loc["lon"])
+    if key not in _WEATHER_CACHE:
+        data = _fetch_weather(loc)
+        if data is None:
+            log.info("Wetter: zweiter Versuch")
+            data = _fetch_weather(loc)
+        _WEATHER_CACHE[key] = data
+    return _WEATHER_CACHE[key]
+
+
+def _fetch_weather(loc: dict) -> dict | None:
     r = get(
         "https://api.open-meteo.com/v1/forecast",
         params={
