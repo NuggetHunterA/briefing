@@ -19,7 +19,10 @@ und veröffentlicht sie auf GitHub Pages:
    (DWD) und Schulferien (OpenHolidays API) und berechnet Feiertage und Mondphase selbst.
 2. `briefing/curate.py` filtert, sortiert (Padres und Athletics zuerst, Brandenburg an der Havel zuerst,
    bei Verbraucher-Meldungen Geldthemen nach hinten) und entfernt Dubletten.
-3. `briefing/llm.py` lässt Claude Spoiler prüfen, den Welt-Aufmacher wählen und drei Longreads
+   Meldungen, die schon an einem früheren Tag zu sehen waren, kommen nicht noch einmal (Liste `shown`
+   in `data.json`, `REPEAT_DAYS` Tage lang). Gleiche Adresse mit deutlich neuer Überschrift gilt als
+   Update und darf wieder erscheinen. Innerhalb eines Tages (Morgen, Mittag, Abend) bleibt alles stehen.
+3. `briefing/llm.py` lässt Claude Spoiler prüfen, den Welt-Aufmacher wählen (ohne Themen, die an den Vortagen schon liefen, außer es gibt Neues) und drei Longreads
    aussuchen (nach dem Interessen-Ranking der Person in `LONGREAD_INTERESTS`). Ohne Claude-Zugang läuft alles mit festen Regeln weiter.
 4. `briefing/render.py` + `templates/index.html.j2` + `static/` erzeugen die Seite.
 

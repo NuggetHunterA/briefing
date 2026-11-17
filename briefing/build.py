@@ -126,10 +126,16 @@ def build_one(out: Path, now_local: datetime, fixture: str | None, dump: str | N
     history = set(prev.get("longread_history", []))
     keep_longreads = prev.get("date") == today and prev.get("longreads")
 
+    # Was an früheren Tagen schon zu sehen war, kommt nicht noch einmal
+    shown = curate.shown_log(prev, today)
+    repeats = curate.drop_repeats(sections, shown, today)
+    earlier_titles = {s: [x["title"] for x in shown if x.get("s") == s and x.get("d", "") < today]
+                      for s in ("welt", "brandenburg")}
+
     spoiler_candidates = [it for s in config.SPOILER_SECTIONS for it in sections[s]
                           if curate.needs_spoiler_check(it, cutoff)]
     edited = llm.edit(spoiler_candidates, sections["welt"], sections["brandenburg"],
-                      sections["longreads"], history)
+                      sections["longreads"], history, earlier_titles)
 
     hidden = curate.apply_spoilers(sections, set(edited["spoilers"]) if edited else None, cutoff)
 
@@ -162,6 +168,8 @@ def build_one(out: Path, now_local: datetime, fixture: str | None, dump: str | N
         if s != "longreads":
             sections[s] = sections[s][:n]
 
+    shown = curate.remember(shown, sections, today, today)
+
     edition = {
         "date": today,
         "generated": now_local.isoformat(),
@@ -171,6 +179,8 @@ def build_one(out: Path, now_local: datetime, fixture: str | None, dump: str | N
         "sections": sections,
         "longreads": longreads,
         "longread_history": history,
+        "shown": shown,
+        "repeats_dropped": repeats,
         "hidden": hidden,
         "transactions": raw["transactions"],
         "hertha": raw["football"].get("hertha"),

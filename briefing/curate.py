@@ -219,3 +219,73 @@ def fallback_longreads(items: list[dict], exclude: set[str]) -> list[dict]:
         if len(picks) == config.LIMITS["longreads"]:
             break
     return picks
+
+
+# --- Wiederholungen über mehrere Tage ---
+# Jede Ausgabe merkt sich in data.json ("shown"), welche Meldungen sie gezeigt hat und an welchem Tag zuerst.
+# Was schon an einem früheren Tag zu sehen war, fliegt raus. Am selben Tag (Morgen, Mittag, Abend) bleibt alles stehen.
+
+STOPWORDS = {"der", "die", "das", "und", "oder", "mit", "für", "von", "vom", "zum", "zur", "den", "dem", "des",
+             "ein", "eine", "einen", "auf", "aus", "bei", "nach", "über", "wie", "was", "ist", "sind", "nicht",
+             "the", "and", "for", "with", "from", "into", "after", "over", "how", "what", "why", "are", "was"}
+
+
+def title_words(title: str) -> set[str]:
+    words = re.findall(r"[a-z0-9äöüß]+", title.lower())
+    return {w for w in words if (len(w) > 2 or w.isdigit()) and w not in STOPWORDS}
+
+
+def similarity(a: set[str], b: set[str]) -> float:
+    return len(a & b) / len(a | b) if a and b else 0.0
+
+
+def shown_log(prev: dict, now_date: str) -> list[dict]:
+    """Bisher gezeigte Meldungen der letzten Tage. Alte Ausgaben ohne "shown" liefern ihre Rubriken nach."""
+    log_ = [x for x in prev.get("shown", []) if isinstance(x, dict) and x.get("id")]
+    if prev.get("date"):
+        log_ = remember(log_, prev.get("sections") or {}, prev["date"], now_date)
+    return log_
+
+
+def remember(log_: list[dict], sections: dict[str, list[dict]], date: str, now_date: str) -> list[dict]:
+    """Gezeigte Meldungen eintragen (erster Tag bleibt), Einträge älter als REPEAT_DAYS verwerfen."""
+    first = {x["id"]: x for x in log_}
+    for section, items in sections.items():
+        if section == "longreads":  # haben ihre eigene Liste (longread_history)
+            continue
+        for it in items:
+            if it["id"] not in first:
+                first[it["id"]] = {"id": it["id"], "d": date, "s": section, "title": it["title"]}
+    oldest = (datetime.fromisoformat(now_date) - timedelta(days=config.REPEAT_DAYS)).date().isoformat()
+    return [x for x in first.values() if x.get("d", "") >= oldest]
+
+
+def seen_before(it: dict, earlier: list[dict], earlier_by_id: dict[str, dict]) -> bool:
+    """Schon an einem früheren Tag gezeigt? Gleiche Adresse mit deutlich neuer Überschrift gilt als
+    aktualisierte Meldung und darf wieder erscheinen. Fast gleiche Überschrift (80 % gleiche Wörter) unter neuer Adresse gilt als Wiederholung."""
+    words = title_words(it["title"])
+    old = earlier_by_id.get(it["id"])
+    if old is not None:
+        return similarity(words, title_words(old.get("title", ""))) >= 0.5
+    return any(similarity(words, title_words(x.get("title", ""))) >= 0.8 for x in earlier)
+
+
+def drop_repeats(sections: dict[str, list[dict]], log_: list[dict], today: str) -> dict[str, int]:
+    """Meldungen von früheren Tagen entfernen. Bleiben in einer Rubrik zu wenige neue übrig,
+    füllen Wiederholungen bis REPEAT_MIN_ITEMS auf (lieber eine bekannte Meldung als eine leere Spalte)."""
+    earlier = [x for x in log_ if x.get("d", "") < today]
+    by_id = {x["id"]: x for x in earlier}
+    dropped = {}
+    for section, items in sections.items():
+        if section == "longreads" or not items:
+            continue
+        new, old = [], []
+        for it in items:
+            (old if seen_before(it, earlier, by_id) else new).append(it)
+        if len(new) < config.REPEAT_MIN_ITEMS:
+            new += old[: config.REPEAT_MIN_ITEMS - len(new)]
+        sections[section] = new
+        dropped[section] = len(items) - len(new)
+        if dropped[section]:
+            log.info("Wiederholungen %s: %d Meldungen von früheren Tagen ausgelassen", section, dropped[section])
+    return dropped
