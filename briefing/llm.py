@@ -34,6 +34,10 @@ Aufgaben:
    achte auf Themenvielfalt, kein Boulevard.
 3. "brandenburg": Ordne die Brandenburg-Meldungen, bis zu 7 ids. Meldungen aus Brandenburg an der Havel
    und Umgebung zuerst, dann landesweit Wichtiges. Keine Doppelungen, keine reinen Berlin-Themen.
+   Zu 2. und 3.: "earlier_days" enthält die Überschriften, die {reader} an den Vortagen schon gelesen hat.
+   Meldungen zum selben Ereignis lässt du weg oder setzt sie ans Ende, außer es gibt eine echte neue
+   Entwicklung (Entscheidung, Urteil, neue Zahlen, Wendung). Bloße Nachberichte, Reaktionen oder
+   dieselbe Geschichte aus anderer Quelle zählen nicht als neu.
 4. "longreads": Wähle genau 3 Texte aus "longreads", die gut geschrieben, substanziell und für das
    aktuelle Zeitgeschehen relevant sind. Unterschiedliche Themen und möglichst unterschiedliche Quellen.
    Nichts aus "already_shown". Zu jedem ein Satz "why" auf Deutsch (max. 160 Zeichen), warum sich
@@ -85,7 +89,7 @@ def _env() -> dict:
     return env
 
 
-def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | None:
+def edit(spoiler_items, welt, brandenburg, longreads, already_shown, earlier_days=None) -> dict | None:
     if not available():
         log.info("Kein Claude-Zugang konfiguriert: Ausgabe wird ohne LLM gebaut.")
         return None
@@ -95,6 +99,7 @@ def edit(spoiler_items, welt, brandenburg, longreads, already_shown) -> dict | N
         "brandenburg": _slim(brandenburg, 30),
         "longreads": _slim(longreads, 60, 400),
         "already_shown": sorted(already_shown),
+        "earlier_days": {s: titles[-60:] for s, titles in (earlier_days or {}).items()},
         "longread_interests": config.LONGREAD_INTERESTS,
     }
     prompt = PROMPT.replace("{reader}", config.READER) + json.dumps(payload, ensure_ascii=False)

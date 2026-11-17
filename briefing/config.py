@@ -22,6 +22,12 @@ LIMITS = {"mlb": 7, "nba": 6, "gute": 6, "brandenburg": 7, "welt": 8, "longreads
 MAX_AGE_HOURS = {"mlb": 72, "nba": 48, "fussball": 48, "brandenburg": 48, "welt": 24, "longreads": 24 * 10,
                  "gute": 72, "wissen": 72, "verbraucher": 96, "jura": 96}
 
+# Meldungen, die schon an einem früheren Tag gezeigt wurden, so viele Tage lang auslassen
+# (gilt für alle Rubriken außer Longreads, die haben ihre eigene Liste)
+REPEAT_DAYS = 5
+# Bleiben in einer Rubrik weniger neue Meldungen übrig, wird mit Wiederholungen bis hierhin aufgefüllt
+REPEAT_MIN_ITEMS = 3
+
 # Lieblingsteams: werden in der MLB-Rubrik nach oben sortiert
 MLB_FAVORITES = {
     "padres": {"name": "Padres", "team_id": 135, "words": ["padres", "san diego"]},
